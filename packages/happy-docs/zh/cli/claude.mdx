@@ -1,0 +1,76 @@
+---
+title: "Claude 模式"
+description: "将 Happy Next 与 Claude Code 配合使用 — 默认的 AI 编程代理。"
+---
+
+Claude Code 是 Happy 的默认代理。不带子命令运行 `happy` 即可启动 Claude Code 会话。
+
+## 基本用法
+
+```bash
+happy
+```
+
+这将在终端中启动 Claude Code，并叠加 Happy 的移动端同步层。你在 Claude Code 中能做的一切，都可以通过 Happy 来完成 — 还额外支持移动端访问、语音控制和编排功能。
+
+## Claude Code 选项
+
+Happy 支持**所有 Claude Code 参数** — 任何 Happy 无法识别的参数都会直接传递给 Claude Code。例如：
+
+```bash
+happy -m sonnet-4-6           # 选择模型
+happy -p plan                  # 设置权限模式
+happy --resume                 # 恢复上次会话
+happy --allowedTools Read,Write,Bash
+```
+
+运行 `happy --help` 可查看 Happy 专属选项和 Claude Code 选项。
+
+## Happy 专属参数
+
+以下参数由 Happy 本身处理（不会传递给 Claude Code）：
+
+| 参数 | 说明 |
+|------|------|
+| `--yolo` | `--dangerously-skip-permissions` 的快捷方式 |
+| `--claude-env KEY=VALUE` | 为 Claude Code 进程设置环境变量 |
+| `--js-runtime <node\|bun>` | 用于启动 Claude Code 的运行时（默认：node） |
+| `--happy-starting-mode <local\|remote>` | `local` 为交互式终端，`remote` 为移动端控制 |
+| `--chrome` / `--no-chrome` | 启用或禁用 Chrome 浏览器访问 |
+
+### 环境变量
+
+向 Claude Code 进程传递环境变量：
+
+```bash
+happy --claude-env API_KEY=sk-123 --claude-env DEBUG=true
+```
+
+### 权限快捷方式
+
+`--yolo` 是 Happy 对 Claude Code `--dangerously-skip-permissions` 的简写：
+
+```bash
+happy --yolo
+```
+
+<Warning>
+这会跳过所有权限确认提示。代理可以在不询问的情况下修改文件、执行命令和发起网络请求。
+</Warning>
+
+### JavaScript 运行时
+
+默认情况下，Happy 使用 Node.js 启动 Claude Code。如需使用 Bun：
+
+```bash
+happy --js-runtime bun
+```
+
+### 启动模式
+
+控制会话以本地（交互式）还是远程（移动端控制）模式启动：
+
+```bash
+happy --happy-starting-mode local    # 交互式终端（默认）
+happy --happy-starting-mode remote   # 从移动端控制
+```

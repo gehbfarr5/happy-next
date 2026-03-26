@@ -1,0 +1,81 @@
+---
+title: "安装"
+description: "在 macOS、Linux 或 Windows 上安装 Happy Next CLI。"
+---
+
+Happy Next CLI 封装了你现有的 AI 编程工具（Claude Code、Codex、Gemini CLI），并增加了移动端访问、实时同步和编排能力。
+
+## 系统要求
+
+- **Node.js 20** 或更高版本
+- 至少安装以下一种 AI 编程工具：
+  - [Claude Code](https://docs.anthropic.com/en/docs/claude-code/getting-started)
+  - [Codex](https://github.com/openai/codex)
+  - [Gemini CLI](https://github.com/google-gemini/gemini-cli)
+
+## 安装
+
+```bash
+npm install -g happy-next-cli
+```
+
+验证安装：
+
+```bash
+happy --version
+# 0.2.3
+```
+
+## 首次运行
+
+进入项目目录并运行：
+
+```bash
+happy
+```
+
+这将启动一个 Claude Code 会话（默认代理）。首次运行时，Happy 会：
+
+1. 生成加密密钥对，存储在 `~/.happy/access.key`
+2. 将你的设备注册到 Happy 服务器
+3. 自动启动**守护进程**（后台服务）
+4. 显示二维码，用于移动端配对
+
+<Warning>
+**请妥善保管你的加密密钥。** `~/.happy/access.key` 文件是你的身份和加密密钥。如果丢失，你将无法解密会话历史。请务必备份。
+</Warning>
+
+## 数据目录
+
+Happy 将数据存储在 `~/.happy/`：
+
+| 文件 | 用途 |
+|------|------|
+| `access.key` | 你的加密私钥 |
+| `settings.json` | CLI 配置 |
+| `daemon.state.json` | 守护进程状态信息 |
+| `logs/` | 会话和守护进程日志 |
+
+## 更新
+
+```bash
+npm update -g happy-next-cli
+```
+
+或使用内置命令：
+
+```bash
+happy update
+```
+
+## 卸载
+
+```bash
+npm uninstall -g happy-next-cli
+```
+
+同时删除本地数据：
+
+```bash
+rm -rf ~/.happy
+```

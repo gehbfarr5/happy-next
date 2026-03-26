@@ -1,0 +1,55 @@
+---
+title: "Voice Usage"
+description: "How to use voice commands effectively with Happy."
+---
+
+Once voice is configured, tap the microphone icon in any session to start a voice conversation.
+
+## How the voice agent thinks
+
+The voice agent uses a priority-based decision framework:
+
+1. **Tool action?** — If you're asking to do something in the app (switch sessions, approve permissions), it calls a tool directly
+2. **For your coding agent?** — If you're giving coding instructions, it forwards to Claude/Codex/Gemini
+3. **For the voice agent itself?** — If you're chatting or asking a question, it replies directly
+4. **Uncertain?** — It asks a clarifying question rather than guessing
+
+## Example commands
+
+**Forwarded to your coding agent:**
+- "Refactor the authentication module to use JWT"
+- "Write tests for the user registration endpoint"
+- "Explain what the sync function does"
+
+**Handled directly by voice agent:**
+- "What's the current session status?"
+- "Read me the latest agent response"
+
+**Tool actions:**
+- "Switch to session 2"
+- "Approve the permission request"
+- "Create a new Claude session"
+- "Go back to the home screen"
+- "End this voice conversation"
+
+## Speech correction
+
+The voice agent automatically corrects common speech-to-text errors, especially for technical terms. For example:
+
+- Homophones: "组建" → "组件" (component in Chinese)
+- Technical terms: Code function names and programming concepts are corrected using context from your current session
+
+## Context awareness
+
+The voice agent knows about:
+- Your current session and its recent messages
+- What the AI coding agent is currently doing
+- Which files are being edited
+
+This context helps it make better decisions about how to handle your requests. For example, if your agent just finished a task, the voice agent can summarize the results without you having to ask.
+
+## Tips
+
+- **Keep it short** — The voice agent responds best to concise instructions
+- **Be specific** — "Fix the bug in auth.ts" is better than "fix that thing"
+- **Use natural language** — You don't need to use special syntax or commands

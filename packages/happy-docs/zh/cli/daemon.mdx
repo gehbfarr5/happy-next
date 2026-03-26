@@ -1,0 +1,50 @@
+---
+title: "守护进程"
+description: "管理会话的 Happy 后台服务。"
+---
+
+守护进程是运行在你设备上的后台服务。它管理活跃会话，允许移动端远程启动新会话，并保持设备与 Happy 服务器的连接。
+
+## 自动启动
+
+守护进程会在你首次运行 `happy` 会话时自动启动。通常无需手动管理。
+
+## 命令
+
+```bash
+happy daemon start       # 启动守护进程
+happy daemon stop        # 停止守护进程
+happy daemon restart     # 重启守护进程
+happy daemon status      # 显示守护进程状态（PID、端口、版本）
+happy daemon list        # 列出活跃会话
+happy daemon logs        # 显示最新日志文件路径
+```
+
+## 开机自启
+
+启用守护进程在电脑开机时自动启动：
+
+```bash
+happy daemon enable      # 启用开机自启
+happy daemon disable     # 禁用开机自启
+```
+
+别名 `install` 和 `uninstall` 同样可用：
+
+```bash
+happy daemon install     # 等同于 enable
+happy daemon uninstall   # 等同于 disable
+```
+
+## 自动更新
+
+当你更新 Happy CLI（`npm update -g happy-next-cli`）后，守护进程会在下次心跳检测时发现版本不匹配，并自动使用新版本重启。无需手动重启。
+
+## 工作原理
+
+守护进程：
+1. 作为分离的后台进程运行
+2. 与 Happy 服务器保持 WebSocket 连接，接收远程命令
+3. 暴露本地 HTTP 服务器（仅 localhost），用于 CLI 与守护进程的通信
+4. 每 60 秒发送心跳，检查更新并清理失效会话
+5. 将状态存储在 `~/.happy/daemon.state.json`

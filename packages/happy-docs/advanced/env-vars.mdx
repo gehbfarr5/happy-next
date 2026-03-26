@@ -1,0 +1,117 @@
+---
+title: "Environment Variables"
+description: "Complete reference for all Happy Next environment variables."
+---
+
+## CLI
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `HAPPY_SERVER_URL` | `https://api.happy-next.com` | Happy server API endpoint |
+| `HAPPY_WEBAPP_URL` | `https://app.happy-next.com` | Happy web app URL |
+| `HAPPY_HOME_DIR` | `~/.happy` | Local data directory |
+| `HAPPY_VARIANT` | `stable` | `stable` or `dev` (run both versions side-by-side) |
+| `HAPPY_EXPERIMENTAL` | — | Enable experimental features (`true`/`1`/`yes`) |
+| `HAPPY_DISABLE_CAFFEINATE` | — | Disable macOS sleep prevention |
+| `HAPPY_EXTRA_MCP_SERVERS` | — | Additional MCP servers (JSON) |
+| `GEMINI_MODEL` | — | Override default Gemini model |
+| `GOOGLE_CLOUD_PROJECT` | — | Google Cloud Project ID (Workspace accounts) |
+
+## Server
+
+### Required
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DATABASE_URL` | — | PostgreSQL connection string |
+| `HANDY_MASTER_SECRET` | — | Master encryption key (64+ characters) |
+| `PORT` | `3005` | HTTP server port |
+
+### Optional
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `NODE_ENV` | `development` | `development` or `production` |
+| `REDIS_URL` | — | Redis connection string |
+| `APP_URL` | — | Public server URL |
+| `METRICS_ENABLED` | `false` | Enable Prometheus metrics |
+| `METRICS_PORT` | `9090` | Metrics endpoint port |
+
+### File Storage (S3/MinIO)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `S3_HOST` | — | S3 hostname |
+| `S3_PORT` | — | S3 port |
+| `S3_USE_SSL` | `false` | Use HTTPS for S3 |
+| `S3_ACCESS_KEY` | — | S3 access key |
+| `S3_SECRET_KEY` | — | S3 secret key |
+| `S3_BUCKET` | — | S3 bucket name |
+| `S3_PUBLIC_URL` | — | Public URL for uploaded files |
+
+### GitHub OAuth
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GITHUB_APP_ID` | — | GitHub App ID |
+| `GITHUB_PRIVATE_KEY` | — | GitHub App private key |
+| `GITHUB_CLIENT_ID` | — | OAuth Client ID |
+| `GITHUB_CLIENT_SECRET` | — | OAuth Client Secret |
+| `GITHUB_REDIRECT_URL` | — | OAuth callback URL |
+| `GITHUB_WEBHOOK_SECRET` | — | Webhook signature secret |
+
+### Voice
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ELEVENLABS_AGENT_ID` | — | ElevenLabs voice agent ID |
+| `VOICE_TOOL_BRIDGE_KEY` | — | Voice tool bridge authorization key |
+
+## Voice Gateway (happy-voice)
+
+### Pipeline
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AGENT_STT` | `openai/gpt-4o-mini-transcribe:zh` | Speech-to-text model |
+| `AGENT_LLM` | `openai/gpt-4.1-mini` | Voice agent LLM |
+| `AGENT_TTS` | `cartesia/sonic-3:...` | Text-to-speech model |
+| `AGENT_WELCOME_MESSAGE` | — | Custom greeting message |
+
+### LiveKit
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `LIVEKIT_URL` | — | LiveKit server URL (required) |
+| `LIVEKIT_API_KEY` | — | LiveKit API key (required) |
+| `LIVEKIT_API_SECRET` | — | LiveKit API secret (required) |
+| `LIVEKIT_AGENT_NAME` | `happy-voice-agent` | Agent registration name |
+| `LIVEKIT_ROOM_TTL_SECONDS` | `3600` | Room auto-cleanup timeout |
+| `LIVEKIT_TOKEN_TTL_SECONDS` | `600` | Participant token lifetime |
+
+### Server
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `HOST` | `0.0.0.0` | API server host |
+| `PORT` | `3040` | API server port |
+| `VOICE_PUBLIC_KEY` | — | API authorization key (required) |
+
+### Speech Tuning
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AGENT_MIN_ENDPOINTING_DELAY_MS` | `1600` | Min silence before end-of-utterance |
+| `AGENT_MAX_ENDPOINTING_DELAY_MS` | `7000` | Max silence tolerance |
+| `AGENT_VAD_ACTIVATION_THRESHOLD` | `0.5` | Voice activity detection threshold (0-1) |
+
+## App
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `APP_ENV` | — | `development`, `preview`, or `production` |
+| `EXPO_PUBLIC_POSTHOG_API_KEY` | — | PostHog analytics key |
+| `EXPO_PUBLIC_ELEVENLABS_AGENT_ID` | — | ElevenLabs voice agent ID |
+| `EXPO_PUBLIC_VOICE_PROVIDER` | — | Voice provider (`elevenlabs` or `happy-voice`) |
+| `EXPO_PUBLIC_VOICE_BASE_URL` | — | Voice gateway URL |
+| `EXPO_PUBLIC_VOICE_PUBLIC_KEY` | — | Voice gateway public key |

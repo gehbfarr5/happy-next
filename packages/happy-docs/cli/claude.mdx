@@ -1,0 +1,76 @@
+---
+title: "Claude Mode"
+description: "Use Happy Next with Claude Code — the default AI coding agent."
+---
+
+Claude Code is the default agent in Happy. Running `happy` without a subcommand starts a Claude Code session.
+
+## Basic usage
+
+```bash
+happy
+```
+
+This opens Claude Code in your terminal with Happy's mobile sync layer on top. Everything you can do in Claude Code, you can do through Happy — plus mobile access, voice control, and orchestration.
+
+## Claude Code options
+
+Happy supports **all Claude Code flags** — any flag not recognized by Happy is passed through to Claude Code directly. For example:
+
+```bash
+happy -m sonnet-4-6           # Choose a model
+happy -p plan                  # Set permission mode
+happy --resume                 # Resume last session
+happy --allowedTools Read,Write,Bash
+```
+
+Run `happy --help` to see both Happy-specific and Claude Code options.
+
+## Happy-specific flags
+
+These flags are handled by Happy itself (not passed to Claude Code):
+
+| Flag | Description |
+|------|-------------|
+| `--yolo` | Shortcut for `--dangerously-skip-permissions` |
+| `--claude-env KEY=VALUE` | Set environment variable for the Claude Code process |
+| `--js-runtime <node\|bun>` | Runtime to spawn Claude Code with (default: node) |
+| `--happy-starting-mode <local\|remote>` | `local` for interactive terminal, `remote` for mobile-controlled |
+| `--chrome` / `--no-chrome` | Enable or disable Chrome browser access |
+
+### Environment variables
+
+Pass environment variables to the Claude Code process:
+
+```bash
+happy --claude-env API_KEY=sk-123 --claude-env DEBUG=true
+```
+
+### Permission shortcut
+
+`--yolo` is Happy's shorthand for Claude Code's `--dangerously-skip-permissions`:
+
+```bash
+happy --yolo
+```
+
+<Warning>
+This skips all permission prompts. The agent can modify files, run commands, and make network requests without asking.
+</Warning>
+
+### JavaScript runtime
+
+By default, Happy spawns Claude Code with Node.js. To use Bun instead:
+
+```bash
+happy --js-runtime bun
+```
+
+### Starting mode
+
+Control whether the session starts in local (interactive) or remote (mobile-controlled) mode:
+
+```bash
+happy --happy-starting-mode local    # Interactive terminal (default)
+happy --happy-starting-mode remote   # Controlled from mobile app
+```

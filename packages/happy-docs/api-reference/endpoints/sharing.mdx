@@ -1,0 +1,84 @@
+---
+title: "Sharing"
+description: "Share sessions with other users or via public links."
+---
+
+## Private Sharing
+
+### List shares
+
+```
+GET /v1/sessions/:sessionId/shares
+```
+
+List all users a session is shared with (owner only).
+
+### Share with user
+
+```
+POST /v1/sessions/:sessionId/shares
+```
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `userId` | string | Target user ID |
+| `accessLevel` | string | `view`, `edit`, or `admin` |
+| `encryptedKey` | string | Session key encrypted for the recipient |
+
+### Update access level
+
+```
+PATCH /v1/sessions/:sessionId/shares/:userId
+```
+
+Change a user's access level.
+
+### Revoke share
+
+```
+DELETE /v1/sessions/:sessionId/shares/:userId
+```
+
+Remove a user's access to a shared session.
+
+## Public Sharing
+
+### Create public link
+
+```
+POST /v1/sessions/:sessionId/public-share
+```
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `expiresAt` | string | Optional expiration date (ISO 8601) |
+| `maxUses` | number | Optional maximum number of uses |
+
+**Response:**
+
+```json
+{
+  "token": "abc123...",
+  "url": "https://app.happy-next.com/share/abc123..."
+}
+```
+
+### Access public session
+
+```
+GET /v1/public-sessions/:token
+```
+
+Access a publicly shared session by token.
+
+### Delete public link
+
+```
+DELETE /v1/sessions/:sessionId/public-share
+```
+
+Delete a public share link, revoking all access.

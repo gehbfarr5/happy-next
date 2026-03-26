@@ -1,0 +1,35 @@
+---
+title: "Codex 模式"
+description: "将 Happy Next 与 OpenAI Codex 配合使用，进行 AI 驱动的编程。"
+---
+
+使用以下命令启动 Codex 会话：
+
+```bash
+happy codex
+```
+
+## 前置条件
+
+安装 [Codex CLI](https://github.com/openai/codex)，并确保已配置有效的 OpenAI API 密钥。
+
+你可以通过 Happy 连接 OpenAI 凭据：
+
+```bash
+happy connect codex
+```
+
+## 模型选择
+
+Codex 支持多个不同能力级别的模型。在启动会话时设置模型 — 模型选择通过移动端应用或会话配置进行管理。
+
+可用模型包括：
+- `gpt-5.4` — 最新、最强大
+- `gpt-5.3-codex` — 针对代码优化
+- `gpt-5.2-codex` — 上一代
+- `gpt-5.1-codex-max` — 最大推理能力
+- `gpt-5.1-codex-mini` — 轻量、快速
+
+## 工作原理
+
+在底层，Happy 启动 Codex `app-server` 并通过 JSON-RPC 进行通信。移动端应用和语音功能的使用方式与 Claude 模式完全相同 — 你可以从手机上发送消息、批准权限和监控进度。

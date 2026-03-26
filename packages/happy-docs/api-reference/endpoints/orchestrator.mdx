@@ -1,0 +1,82 @@
+---
+title: "Orchestrator"
+description: "Create and manage multi-agent task runs."
+---
+
+## Create run
+
+```
+POST /v1/orchestrator/runs
+```
+
+Create a new orchestrator run with tasks.
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tasks` | array | Array of task definitions |
+| `tasks[].prompt` | string | Task prompt/instruction |
+| `tasks[].provider` | string | `claude`, `codex`, or `gemini` |
+| `tasks[].model` | string | Model identifier |
+| `tasks[].workingDirectory` | string | Working directory path |
+| `tasks[].dependsOn` | array | Task IDs this task depends on |
+
+## List runs
+
+```
+GET /v1/orchestrator/runs
+```
+
+List orchestrator runs for the authenticated user.
+
+## Get run
+
+```
+GET /v1/orchestrator/runs/:runId
+```
+
+Get details of a specific run, including all tasks and their status.
+
+**Response:**
+
+```json
+{
+  "id": "clx...",
+  "status": "running",
+  "tasks": [
+    {
+      "id": "clx...",
+      "prompt": "Set up database schema",
+      "provider": "claude",
+      "model": "sonnet-4-6",
+      "status": "completed",
+      "dependsOn": []
+    },
+    {
+      "id": "clx...",
+      "prompt": "Write API endpoints",
+      "provider": "claude",
+      "model": "sonnet-4-6",
+      "status": "running",
+      "dependsOn": ["clx..."]
+    }
+  ]
+}
+```
+
+## Cancel run
+
+```
+POST /v1/orchestrator/runs/:runId/cancel
+```
+
+Cancel a running orchestrator run.
+
+## Poll for completion
+
+```
+POST /v1/orchestrator/runs/:id/pend
+```
+
+Long-poll for run completion or status changes.

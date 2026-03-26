@@ -1,0 +1,59 @@
+---
+title: "Sharing"
+description: "Share AI coding sessions with teammates securely."
+---
+
+Happy lets you share sessions with other Happy users, either privately via friend invite or via public links.
+
+## Friends
+
+Before you can share sessions privately, you need to add friends:
+
+1. Go to the **Friends** tab in the app
+2. Tap **Search** to find users by username
+3. Send a friend request — the other user will see it in their pending requests
+4. Once accepted, you can share sessions with each other
+
+<Info>
+Friend discovery requires a **GitHub account**. Connect your GitHub in **Settings > GitHub** to get a username that others can search for.
+</Info>
+
+## Private sharing
+
+Share a session directly with a friend:
+
+1. Open the session you want to share
+2. Tap the share icon in the top bar
+3. Select a friend from the list
+4. Choose an access level:
+   - **View** — Can read messages but not send
+   - **Edit** — Can read and send messages
+   - **Admin** — Full control including sharing with others
+
+The shared session is end-to-end encrypted. Your friend receives the session encryption key through a secure NaCl Box key exchange — the server cannot read the shared content.
+
+Shared sessions sync in real time: messages, git status, and voice chat are broadcast to all participants.
+
+## Public share links
+
+Create a link that anyone can use to view a session:
+
+1. Open the session
+2. Tap share > **Create public link**
+3. Configure options:
+   - **Expiration** — How long the link is valid
+   - **Use limit** — Maximum number of viewers
+4. Copy and send the link
+
+Public links use token-derived encryption keys — the link itself contains the decryption key, so anyone with the link can view the session.
+
+<Warning>
+Public links contain the decryption key in the URL. Anyone who obtains the link can read the session contents. Share them carefully.
+</Warning>
+
+## Managing shares
+
+View and manage all shares for a session:
+- Revoke access for individual users
+- Delete public links
+- Change access levels

@@ -1,0 +1,237 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Happy Next",
+  "colors": {
+    "primary": "#475569",
+    "light": "#94A3B8",
+    "dark": "#334155"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "languages": [
+      {
+        "language": "en",
+        "tabs": [
+          {
+            "tab": "Guides",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "index",
+                  "quickstart",
+                  "app/setup",
+                  "concepts"
+                ]
+              },
+              {
+                "group": "Using the CLI",
+                "pages": [
+                  "cli/installation",
+                  "cli/claude",
+                  "cli/codex",
+                  "cli/gemini",
+                  "cli/daemon"
+                ]
+              },
+              {
+                "group": "Features",
+                "pages": [
+                  "app/sessions",
+                  "app/sharing",
+                  "cli/orchestrator",
+                  "app/artifacts",
+                  "app/workspaces"
+                ]
+              },
+              {
+                "group": "Integrations",
+                "pages": [
+                  "integrations/dootask",
+                  "integrations/openclaw"
+                ]
+              },
+              {
+                "group": "Voice",
+                "pages": [
+                  "voice/overview",
+                  "voice/setup",
+                  "voice/usage"
+                ]
+              },
+              {
+                "group": "Advanced",
+                "pages": [
+                  "advanced/backend-profiles",
+                  "advanced/encryption",
+                  "advanced/self-hosting",
+                  "advanced/env-vars",
+                  "advanced/troubleshooting"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API Reference",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api-reference/introduction"
+                ]
+              },
+              {
+                "group": "Endpoints",
+                "pages": [
+                  "api-reference/endpoints/auth",
+                  "api-reference/endpoints/sessions",
+                  "api-reference/endpoints/machines",
+                  "api-reference/endpoints/orchestrator",
+                  "api-reference/endpoints/sharing",
+                  "api-reference/endpoints/voice"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "zh",
+        "tabs": [
+          {
+            "tab": "指南",
+            "groups": [
+              {
+                "group": "开始使用",
+                "pages": [
+                  "zh/index",
+                  "zh/quickstart",
+                  "zh/app/setup",
+                  "zh/concepts"
+                ]
+              },
+              {
+                "group": "使用 CLI",
+                "pages": [
+                  "zh/cli/installation",
+                  "zh/cli/claude",
+                  "zh/cli/codex",
+                  "zh/cli/gemini",
+                  "zh/cli/daemon"
+                ]
+              },
+              {
+                "group": "功能",
+                "pages": [
+                  "zh/app/sessions",
+                  "zh/app/sharing",
+                  "zh/cli/orchestrator",
+                  "zh/app/artifacts",
+                  "zh/app/workspaces"
+                ]
+              },
+              {
+                "group": "集成",
+                "pages": [
+                  "zh/integrations/dootask",
+                  "zh/integrations/openclaw"
+                ]
+              },
+              {
+                "group": "语音",
+                "pages": [
+                  "zh/voice/overview",
+                  "zh/voice/setup",
+                  "zh/voice/usage"
+                ]
+              },
+              {
+                "group": "进阶",
+                "pages": [
+                  "zh/advanced/backend-profiles",
+                  "zh/advanced/encryption",
+                  "zh/advanced/self-hosting",
+                  "zh/advanced/env-vars",
+                  "zh/advanced/troubleshooting"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API 参考",
+            "groups": [
+              {
+                "group": "概览",
+                "pages": [
+                  "zh/api-reference/introduction"
+                ]
+              },
+              {
+                "group": "接口",
+                "pages": [
+                  "zh/api-reference/endpoints/auth",
+                  "zh/api-reference/endpoints/sessions",
+                  "zh/api-reference/endpoints/machines",
+                  "zh/api-reference/endpoints/orchestrator",
+                  "zh/api-reference/endpoints/sharing",
+                  "zh/api-reference/endpoints/voice"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/hitosea/happy-next",
+          "icon": "github"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Website",
+        "href": "https://happy-next.com"
+      },
+      {
+        "label": "Web App",
+        "href": "https://app.happy-next.com"
+      },
+      {
+        "label": "Download",
+        "href": "/app/setup"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/hitosea/happy-next"
+      }
+    ]
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/hitosea/happy-next"
+    }
+  }
+}

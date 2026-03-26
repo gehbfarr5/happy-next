@@ -1,0 +1,38 @@
+---
+title: "Authentication"
+description: "Sign in and manage authentication tokens."
+---
+
+## Sign in
+
+```
+POST /v1/auth
+```
+
+Authenticate using a public key and cryptographic signature.
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `publicKey` | string | Your Ed25519 public key (hex) |
+| `signature` | string | Signature of the challenge (hex) |
+| `challenge` | string | The challenge string that was signed |
+| `deviceInfo` | object | Optional device metadata |
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "token": "eyJhbG..."
+}
+```
+
+## Request terminal authentication
+
+```
+POST /v1/auth/request
+```
+
+Request authentication from a terminal session (used for QR code flow). This endpoint is used by the mobile app to initiate authentication with a CLI session via QR code scanning.

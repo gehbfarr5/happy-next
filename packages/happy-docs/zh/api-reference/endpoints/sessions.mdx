@@ -1,0 +1,99 @@
+---
+title: "会话"
+description: "创建、管理 AI 编码会话并与之交互。"
+---
+
+## 列出会话
+
+```
+GET /v1/sessions
+```
+
+列出已认证用户的所有会话。
+
+## 列出活跃会话
+
+```
+GET /v2/sessions/active
+```
+
+仅列出活跃（未结束）的会话。
+
+## 创建会话
+
+```
+POST /v1/sessions
+```
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `machineId` | string | 目标机器 ID |
+| `metadata` | string | 加密的会话元数据 |
+| `encryptionKey` | string | 加密的会话密钥 |
+
+## 获取会话
+
+```
+GET /v1/sessions/:id
+```
+
+根据 ID 获取会话。
+
+## 更新会话
+
+```
+PATCH /v1/sessions/:id
+```
+
+更新会话元数据或状态。
+
+## 删除会话
+
+```
+DELETE /v1/sessions/:id
+```
+
+永久删除会话。
+
+## 发送消息
+
+```
+POST /v3/sessions/:id/messages
+```
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `content` | string | 加密的消息内容（密文字符串） |
+| `localId` | string | 客户端生成的 ID，用于去重 |
+
+**响应：**
+
+```json
+{
+  "id": "clx...",
+  "seq": 42,
+  "localId": "local-123",
+  "content": "encrypted-ciphertext-string...",
+  "createdAt": "2026-03-26T00:00:00.000Z"
+}
+```
+
+## 获取消息
+
+```
+GET /v3/sessions/:id/messages
+```
+
+分页获取消息历史记录。
+
+**查询参数：**
+
+| 参数 | 类型 | 说明 |
+|-------|------|-------------|
+| `before` | number | 获取此序列号之前的消息 |
+| `after` | number | 获取此序列号之后的消息 |
+| `limit` | number | 返回消息的最大数量（默认：50） |

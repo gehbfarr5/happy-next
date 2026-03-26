@@ -1,0 +1,58 @@
+---
+title: "Workspaces"
+description: "Create multi-repo worktree workspaces for cross-repository development."
+---
+
+Workspaces let you work across **multiple Git repositories** in a single AI coding session. Happy creates Git worktrees for each repo, groups them under one workspace directory, and auto-generates shared configuration files.
+
+## Creating a workspace
+
+In the **New Session** wizard:
+
+1. Switch the session type from **Simple** to **Worktree**
+2. A repo picker bar appears — select the repositories you want to include
+3. For each repo, choose a **target branch** (the starting point for your worktree)
+4. Tap **Add directory...** to browse and add repos not yet registered
+5. Create the session
+
+## What happens under the hood
+
+When you create a workspace, Happy:
+
+1. Generates a workspace directory at `~/.happy/workspaces/<name>` on your machine
+2. Creates a **Git worktree** for each selected repo inside that directory
+3. All worktrees share the same branch name (the workspace name)
+4. Copies any configured files (e.g., `.env`) from the base repo to each worktree
+5. Auto-generates a workspace-level `CLAUDE.md` and `AGENTS.md` that `@import` from each repo's config
+
+```
+~/.happy/workspaces/clever-ocean/
+├── CLAUDE.md              # @import from each repo
+├── frontend/              # Worktree of repo A
+│   └── (branch: clever-ocean, based on main)
+└── backend/               # Worktree of repo B
+    └── (branch: clever-ocean, based on develop)
+```
+
+## Managing workspaces
+
+Open a workspace session and tap the **session info** button to access workspace management:
+
+- **Switch repos** — A repo picker lets you switch between repos in the workspace
+- **Create PRs** — Create a pull request for each repo's worktree branch independently (requires `gh` CLI)
+- **Archive** — Clean up the workspace: removes worktrees, deletes branches, and cleans up the workspace directory
+
+## Per-repo configuration
+
+Registered repos can be configured with:
+
+- **Default target branch** — Pre-selected branch when adding the repo to a workspace
+- **Setup script** — Bash script run after worktree creation (e.g., `npm install`)
+- **Archive script** — Bash script run during workspace cleanup
+- **Copy files** — Files to copy from the base repo to the worktree (e.g., `.env`, `.env.local`)
+
+## Requirements
+
+- All selected directories must be **Git repositories**
+- The `gh` CLI is needed for PR creation
+- The target machine must be **online** during workspace creation

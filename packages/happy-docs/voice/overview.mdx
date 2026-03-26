@@ -1,0 +1,37 @@
+---
+title: "Voice Overview"
+description: "Control your AI coding agent with voice commands."
+---
+
+Happy Voice lets you talk to your AI coding sessions instead of typing. It works through a voice gateway that processes your speech and intelligently routes it — either responding directly or forwarding instructions to your AI coding agent.
+
+## How it works
+
+The voice pipeline has three stages:
+
+1. **Speech-to-Text (STT)** — Your voice is transcribed in real time
+2. **Language Model (LLM)** — An intermediate AI decides what to do with your message
+3. **Text-to-Speech (TTS)** — The response is spoken back to you
+
+The voice agent acts as a smart bridge. It decides whether to:
+
+- **Forward to your coding agent** — For coding instructions like "refactor the auth module"
+- **Reply directly** — For conversational questions like "what's the status?"
+- **Call a tool** — For app actions like "switch to session 2" or "approve the permission"
+
+## Supported languages
+
+Voice works in multiple languages. The agent performs automatic speech correction for technical terms and programming jargon, which is especially useful for non-English languages where STT may misinterpret code-related terminology.
+
+Supported languages include: English, Chinese, Japanese, Korean, Spanish, French, German, and more.
+
+## Voice providers
+
+Happy supports two voice providers:
+
+| Provider | Description |
+|----------|-------------|
+| **Happy Voice** | Built-in, works out of the box with the app — no setup needed |
+| **ElevenLabs** | Third-party voice AI, requires an ElevenLabs account |
+
+Happy Voice is the default and recommended provider. It's built into the app and ready to use immediately. See [Voice Setup](/voice/setup) for configuration details.

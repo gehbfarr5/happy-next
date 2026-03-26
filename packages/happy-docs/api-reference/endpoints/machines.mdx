@@ -1,0 +1,43 @@
+---
+title: "Machines"
+description: "Register and manage connected devices."
+---
+
+## Create machine
+
+```
+POST /v1/machines
+```
+
+Register a new machine (computer running the CLI).
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `metadata` | string | Encrypted machine metadata (hostname, OS, etc.) |
+| `encryptionKey` | string | Encrypted machine key |
+
+## List machines
+
+```
+GET /v1/machines
+```
+
+List all machines for the authenticated user.
+
+## Update machine
+
+```
+PATCH /v1/machines/:id
+```
+
+Update machine metadata or daemon state.
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `metadata` | string | Encrypted machine metadata |
+| `daemonState` | string | Encrypted daemon state |
+| `activity` | object | Activity tracking data |

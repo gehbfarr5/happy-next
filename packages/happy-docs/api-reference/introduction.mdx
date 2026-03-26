@@ -1,0 +1,66 @@
+---
+title: "API Reference"
+description: "The Happy Next REST API for building integrations."
+---
+
+The Happy Next API is a REST API served by the Happy Next server. All endpoints use JSON for request and response bodies.
+
+## Base URL
+
+**Hosted service:**
+```
+https://api.happy-next.com
+```
+
+**Self-hosted:** Your server's URL (e.g., `http://localhost:3005`).
+
+## Authentication
+
+Most endpoints require authentication via a Bearer token in the `Authorization` header:
+
+```
+Authorization: Bearer <token>
+```
+
+Tokens are obtained through the [authentication endpoint](/api-reference/endpoints/auth) using a cryptographic signature scheme (no passwords).
+
+### How authentication works
+
+1. Generate an Ed25519 key pair on your device
+2. Send your public key and a signed challenge to `POST /v1/auth`
+3. The server verifies the signature and returns a JWT token
+4. Include this token in all subsequent requests
+
+## Request format
+
+- Content type: `application/json`
+- All timestamps are ISO 8601 strings or Unix milliseconds
+- IDs are strings (CUID2 format)
+
+## Response format
+
+Successful responses return the data directly. Error responses return a JSON object with an `error` field:
+
+```json
+{
+  "error": "Invalid signature"
+}
+```
+
+The HTTP status code is set in the response header (e.g., 401, 403), not in the body.
+
+## Common status codes
+
+| Code | Meaning |
+|------|---------|
+| `200` | Success |
+| `201` | Created |
+| `400` | Bad request (invalid parameters) |
+| `401` | Unauthorized (missing or invalid token) |
+| `403` | Forbidden (insufficient permissions) |
+| `404` | Not found |
+| `500` | Server error |
+
+## Encryption note
+
+Many fields in API responses contain **encrypted data** (e.g., message content, session metadata). These are stored as encrypted ciphertext that can only be decrypted with the session's encryption key. The API returns the raw encrypted values — client-side decryption is required.

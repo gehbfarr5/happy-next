@@ -1,0 +1,48 @@
+---
+title: "App Setup"
+description: "Download the Happy Next app and pair it with your development machine."
+---
+
+The Happy Next app is available for iOS and Android.
+
+## Download
+
+<CardGroup cols={2}>
+  <Card title="iOS (TestFlight)" icon="apple" href="https://testflight.apple.com/join/XyjvbhXe">
+    Join the TestFlight beta.
+  </Card>
+  <Card title="Android (APK)" icon="android" href="https://github.com/hitosea/happy-next/releases/latest">
+    Download the latest APK from GitHub Releases.
+  </Card>
+</CardGroup>
+
+## Pair with your machine
+
+<Steps>
+  <Step title="Start a Happy session on your computer">
+    Run `happy` in your terminal. A QR code will appear.
+  </Step>
+  <Step title="Open the Happy app">
+    Launch the app on your phone. On first launch, you'll be guided through account setup.
+  </Step>
+  <Step title="Scan the QR code">
+    Tap the scan icon on the home screen and point your camera at the QR code in your terminal.
+  </Step>
+  <Step title="Connected">
+    Your phone is now paired. You'll see your active session in the app.
+  </Step>
+</Steps>
+
+## Account
+
+Happy uses **cryptographic authentication** — no passwords. Your identity is a key pair generated on your device. When you scan the QR code, your phone and computer exchange public keys to establish a secure connection.
+
+## Settings
+
+Access settings by tapping the gear icon. Key options:
+
+- **Appearance** — Light, dark, or automatic theme
+- **Voice** — Voice provider and language settings
+- **Notifications** — Push notification preferences
+- **AI Backend Profiles** — Configure custom API endpoints for Claude, Codex, or Gemini
+- **GitHub** — Connect your GitHub account for social features

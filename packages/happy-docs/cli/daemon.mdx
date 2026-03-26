@@ -1,0 +1,50 @@
+---
+title: "Daemon"
+description: "The Happy background service that manages your sessions."
+---
+
+The daemon is a background service that runs on your machine. It manages active sessions, enables the mobile app to start new sessions remotely, and keeps your machine connected to the Happy server.
+
+## Automatic startup
+
+The daemon starts automatically when you run your first `happy` session. You typically don't need to manage it manually.
+
+## Commands
+
+```bash
+happy daemon start       # Start the daemon
+happy daemon stop        # Stop the daemon
+happy daemon restart     # Restart the daemon
+happy daemon status      # Show daemon status (PID, port, version)
+happy daemon list        # List active sessions
+happy daemon logs        # Show path to latest log file
+```
+
+## Auto-start on boot
+
+Enable the daemon to start automatically when your computer boots:
+
+```bash
+happy daemon enable      # Enable auto-start
+happy daemon disable     # Disable auto-start
+```
+
+Aliases `install` and `uninstall` also work:
+
+```bash
+happy daemon install     # Same as enable
+happy daemon uninstall   # Same as disable
+```
+
+## Auto-update
+
+When you update the Happy CLI (`npm update -g happy-next-cli`), the daemon detects the version mismatch on its next heartbeat and automatically restarts with the new version. No manual restart needed.
+
+## How it works
+
+The daemon:
+1. Runs as a detached background process
+2. Maintains a WebSocket connection to the Happy server for remote commands
+3. Exposes a local HTTP server (localhost only) for CLI-to-daemon communication
+4. Sends heartbeats every 60 seconds to check for updates and prune dead sessions
+5. Stores its state at `~/.happy/daemon.state.json`

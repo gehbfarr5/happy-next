@@ -1,0 +1,109 @@
+---
+title: "Self-Hosting"
+description: "Deploy your own Happy Next server for full control over your data."
+---
+
+You can host your own Happy server instead of using the hosted service at `api.happy-next.com`. This gives you complete control over your data and infrastructure.
+
+Happy supports two modes:
+- **Hosted (default)** — Clients use `https://api.happy-next.com` out of the box
+- **Self-hosted** — Run your own `happy-server`, `happy-voice`, and supporting services with Docker Compose
+
+## Requirements
+
+- **Docker + Docker Compose**
+- **A LiveKit deployment** (not included in `docker-compose.yml`) — for voice features
+  - You'll need `LIVEKIT_URL`, `LIVEKIT_WS_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`
+- **API keys** for voice providers (if using voice)
+  - `OPENAI_API_KEY`, `CARTESIA_API_KEY`
+
+## Quickstart
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/hitosea/happy-next.git
+cd happy-next
+```
+
+2. Create your environment file:
+
+```bash
+cp .env.example .env
+```
+
+3. Edit `.env` and fill in the required values. At minimum:
+   - `HANDY_MASTER_SECRET` — Generate a random 64+ character string
+   - `POSTGRES_*` — Database credentials
+   - `S3_*` — Or use the MinIO defaults
+   - `LIVEKIT_*` + voice API keys — If using voice features
+
+4. Start the stack:
+
+```bash
+docker-compose up -d
+```
+
+5. Apply database migrations (first run only):
+
+```bash
+docker-compose exec happy-server yarn --cwd packages/happy-server prisma migrate deploy
+```
+
+6. Open the web app at `http://localhost:3030`.
+
+## Services
+
+The Docker Compose stack includes:
+
+| Service | Port | Description |
+|---------|------|-------------|
+| `happy-app` | 3030 | Web app (Nginx) |
+| `happy-server` | 3031 | API server (Node.js) |
+| `happy-voice` | 3040 | Voice gateway (Node.js) |
+| `minio` | 3050 | S3-compatible file storage |
+| `postgres` | 5432 | Database |
+| `redis` | 6379 | Caching and Socket.IO adapter |
+
+## Connecting the CLI
+
+The CLI defaults to the hosted API. For self-hosting, set environment variables:
+
+```bash
+HAPPY_SERVER_URL=http://localhost:3031 HAPPY_WEBAPP_URL=http://localhost:3030 happy
+```
+
+## Connecting the mobile app
+
+- **Development builds:** Set `EXPO_PUBLIC_HAPPY_SERVER_URL` when starting Expo, or use the in-app server settings screen
+- **Production builds:** Use the in-app server settings screen to set a custom server URL
+
+## S3 / MinIO notes
+
+`S3_PUBLIC_URL` must be reachable by clients (browser and mobile), not just Docker containers.
+
+- **Local:** MinIO is exposed at `http://localhost:3050`, so `S3_PUBLIC_URL=http://localhost:3050` works
+- **Remote:** Use a real S3-compatible endpoint with a public URL matching your TLS/host setup
+
+## Remote access
+
+If accessing from another device (LAN or internet), avoid hard-coded `localhost` URLs:
+
+- Put the web app, API, and voice gateway behind domains with TLS
+- Set `EXPO_PUBLIC_HAPPY_SERVER_URL` and `EXPO_PUBLIC_VOICE_BASE_URL` to those public origins
+- Set `APP_URL` to your web origin
+
+## Troubleshooting
+
+```bash
+# Check container status
+docker-compose ps
+
+# Tail logs
+docker-compose logs -f happy-server
+docker-compose logs -f happy-voice
+```
+
+Verify ports on the host: Web (3030), API (3031), Voice (3040), MinIO (3050).
+
+See [Environment Variables](/advanced/env-vars) for the complete configuration reference.

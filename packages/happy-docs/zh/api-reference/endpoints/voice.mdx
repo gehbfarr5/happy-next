@@ -1,0 +1,91 @@
+---
+title: "语音"
+description: "通过 Happy Voice 网关管理语音会话。"
+---
+
+这些端点由 **Happy Voice 网关**提供服务（非主 Happy 服务端）。需要在请求头中携带 `X-Voice-Key` 或使用语音公钥的 `Authorization: Bearer`。
+
+## 开始会话
+
+```
+POST /v1/voice/session/start
+```
+
+创建新的语音会话。
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `userId` | string | 用户标识符 |
+| `sessionId` | string | 关联的应用会话 ID |
+| `language` | string | 语言代码（例如 `en`、`zh`） |
+| `initialContextPayload` | object | 语音代理的初始上下文 |
+| `toolBridgeBaseUrl` | string | 用于工具调用的 Happy Server URL |
+| `welcomeMessage` | string | 可选的自定义欢迎语 |
+
+**响应：**
+
+```json
+{
+  "allowed": true,
+  "gatewaySessionId": "uuid",
+  "roomName": "happy_voice_...",
+  "roomUrl": "wss://livekit.example.com",
+  "participantIdentity": "human_...",
+  "participantToken": "jwt-token...",
+  "expiresAt": "2026-03-26T01:00:00.000Z"
+}
+```
+
+## 停止会话
+
+```
+POST /v1/voice/session/stop
+```
+
+停止语音会话并清理房间。
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `gatewaySessionId` | string | 开始会话响应中的会话 ID |
+
+## 获取会话状态
+
+```
+GET /v1/voice/session/:gatewaySessionId/status
+```
+
+查询语音会话的当前状态。
+
+## 发送文本
+
+```
+POST /v1/voice/session/text
+```
+
+向语音会话中注入文本消息。
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `gatewaySessionId` | string | 会话 ID |
+| `text` | string | 要注入的文本 |
+
+## 发送上下文
+
+```
+POST /v1/voice/session/context
+```
+
+向语音代理发送应用上下文。
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `gatewaySessionId` | string | 会话 ID |
+| `payload` | object | 上下文载荷（会话状态、消息等） |

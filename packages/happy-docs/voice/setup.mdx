@@ -1,0 +1,51 @@
+---
+title: "Voice Setup"
+description: "Configure voice providers for Happy."
+---
+
+Voice is configured in the Happy mobile app under **Settings > Voice**.
+
+## Happy Voice (default)
+
+Happy Voice is built into the app and works out of the box — no additional setup or registration required. Just tap the microphone icon in any session to start a voice conversation.
+
+Happy Voice uses a voice gateway based on [LiveKit](https://livekit.io/) with a STT → LLM → TTS pipeline. The hosted gateway is provided for all users by default.
+
+### Self-hosted customization
+
+If you want full control over the voice pipeline — choosing your own STT, LLM, and TTS models, or keeping voice data on your own infrastructure — you can deploy your own Happy Voice gateway.
+
+Requirements:
+- A LiveKit server instance
+- API keys for your chosen providers (e.g., OpenAI for STT/LLM, Cartesia for TTS)
+
+In the Happy app, go to **Settings > Voice** and configure:
+
+- **Provider** — Select "Happy Voice"
+- **Gateway URL** — Your self-hosted Happy Voice endpoint
+- **Public Key** — The authorization key for your voice server
+
+Or set via environment variables:
+
+```bash
+EXPO_PUBLIC_VOICE_PROVIDER=happy-voice
+EXPO_PUBLIC_VOICE_BASE_URL=https://your-voice-server.com
+EXPO_PUBLIC_VOICE_PUBLIC_KEY=your-public-key
+```
+
+See [Self-Hosting](/advanced/self-hosting) for deployment instructions.
+
+## ElevenLabs (alternative)
+
+[ElevenLabs](https://elevenlabs.io) is a third-party voice AI service with high-quality speech synthesis. It requires a free or paid ElevenLabs account.
+
+1. Create an account at [elevenlabs.io](https://elevenlabs.io) and get an Agent ID
+2. In the Happy app, go to **Settings > Voice**
+3. Select **ElevenLabs** as the provider
+4. Enter your Agent ID
+
+Alternatively, set the Agent ID via environment variable:
+
+```bash
+EXPO_PUBLIC_ELEVENLABS_AGENT_ID=your-agent-id
+```

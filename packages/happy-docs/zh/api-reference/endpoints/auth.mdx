@@ -1,0 +1,38 @@
+---
+title: "认证"
+description: "登录并管理认证令牌。"
+---
+
+## 登录
+
+```
+POST /v1/auth
+```
+
+使用公钥和加密签名进行认证。
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `publicKey` | string | 你的 Ed25519 公钥（十六进制） |
+| `signature` | string | 挑战值的签名（十六进制） |
+| `challenge` | string | 被签名的挑战字符串 |
+| `deviceInfo` | object | 可选的设备元数据 |
+
+**响应：**
+
+```json
+{
+  "success": true,
+  "token": "eyJhbG..."
+}
+```
+
+## 请求终端认证
+
+```
+POST /v1/auth/request
+```
+
+从终端会话请求认证（用于二维码扫码流程）。此端点供移动应用通过扫描二维码与 CLI 会话发起认证。

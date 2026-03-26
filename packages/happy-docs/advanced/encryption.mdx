@@ -1,0 +1,61 @@
+---
+title: "Encryption"
+description: "How Happy Next protects your code and conversations with end-to-end encryption."
+---
+
+Happy uses **end-to-end encryption (E2E)** for all data. Your messages, code, and session metadata are encrypted on your device before being sent to the server. The server stores only encrypted blobs it cannot decrypt.
+
+## Zero-knowledge architecture
+
+The Happy server is a **zero-knowledge relay**. It syncs encrypted data between your devices, but:
+
+- It **cannot** read your messages or code
+- It **cannot** decrypt your session metadata
+- It **cannot** access your encryption keys
+- It stores **only** encrypted ciphertext
+
+Even if the server is compromised, your data remains encrypted.
+
+## How it works
+
+### Key generation
+
+When you first run Happy, a **NaCl (Networking and Cryptography library)** key pair is generated:
+
+- **Private key** — Stored locally at `~/.happy/access.key` (never leaves your device)
+- **Public key** — Sent to the server as your identity
+
+### Message encryption
+
+Messages are encrypted using **TweetNaCl Box** (Curve25519 + XSalsa20 + Poly1305):
+
+1. Your device encrypts the message with the session key
+2. The encrypted ciphertext is sent to the server
+3. The server stores it without being able to read it
+4. Your other devices download and decrypt it locally
+
+### Multi-device key exchange
+
+When you pair a new device (e.g., scanning the QR code with your phone), the devices exchange public keys and establish shared encryption keys. This happens through a secure NaCl Box key exchange — the server facilitates the exchange but cannot see the shared keys.
+
+### Session sharing
+
+When you share a session with another user:
+- **Private sharing** uses NaCl Box to encrypt the session key for the recipient's public key
+- **Public links** derive the decryption key from the share token (the key is embedded in the URL)
+
+## Key backup
+
+<Warning>
+**Back up `~/.happy/access.key`.** This file is your encryption private key. If you lose it, you permanently lose access to your encrypted session history. There is no recovery mechanism — this is by design.
+</Warning>
+
+## Library
+
+Happy uses the following cryptographic libraries:
+
+| Library | Purpose |
+|---------|---------|
+| [TweetNaCl](https://tweetnacl.js.org/) | Core encryption (NaCl Box, signatures) |
+| [libsodium](https://doc.libsodium.org/) | Mobile encryption (React Native bindings) |
+| [@noble/ed25519](https://github.com/paulmillr/noble-ed25519) | Ed25519 key operations |

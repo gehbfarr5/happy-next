@@ -1,0 +1,86 @@
+---
+title: "Troubleshooting"
+description: "Common issues and how to fix them."
+---
+
+## Diagnostics
+
+Run the built-in diagnostics tool:
+
+```bash
+happy doctor
+```
+
+This checks your system for common issues: Node.js version, CLI version, daemon status, server connectivity, and installed AI tools.
+
+To reset cached state:
+
+```bash
+happy doctor clean
+```
+
+## Common issues
+
+### CLI won't start
+
+**Symptom:** Running `happy` shows an error or hangs.
+
+**Try:**
+1. Check Node.js version: `node --version` (must be 20+)
+2. Verify the CLI is installed: `happy --version`
+3. Check if the AI tool is installed (e.g., `claude --version` for Claude Code)
+4. Check logs: `happy daemon logs`
+
+### QR code doesn't appear
+
+**Symptom:** The terminal starts but no QR code is displayed.
+
+**Try:**
+1. Ensure your terminal supports Unicode rendering
+2. Try a different terminal (iTerm2, Windows Terminal, etc.)
+3. Check server connectivity: `happy doctor`
+
+### Mobile app can't connect
+
+**Symptom:** Scanning the QR code doesn't pair the phone.
+
+**Try:**
+1. Ensure your phone and computer have internet access
+2. Check that the daemon is running: `happy daemon status`
+3. Restart the daemon: `happy daemon restart`
+4. Re-scan the QR code
+
+### Sessions not syncing
+
+**Symptom:** Messages sent from the phone don't appear in the terminal (or vice versa).
+
+**Try:**
+1. Check daemon status: `happy daemon status`
+2. Check server connectivity: `happy doctor`
+3. Restart the daemon: `happy daemon restart`
+4. Check your network — Happy requires a stable internet connection for sync
+
+### Daemon keeps crashing
+
+**Symptom:** The daemon stops unexpectedly.
+
+**Try:**
+1. Check logs: `happy daemon logs`
+2. Clean state and restart: `happy doctor clean && happy daemon restart`
+3. Check for port conflicts: the daemon uses a local HTTP port
+
+### Voice not working
+
+**Symptom:** Tapping the microphone icon doesn't start a voice session.
+
+**Try:**
+1. Check voice provider configuration in **Settings > Voice**
+2. Ensure microphone permissions are granted
+3. For Happy Voice: verify the gateway URL and public key
+4. For ElevenLabs: verify your Agent ID is correct
+
+## Getting help
+
+- **GitHub Issues:** [github.com/hitosea/happy-next/issues](https://github.com/hitosea/happy-next/issues)
+- **Logs:** `happy daemon logs` shows the latest log file path
+- **Debug mode:** Set `HAPPY_EXPERIMENTAL=true` for verbose logging

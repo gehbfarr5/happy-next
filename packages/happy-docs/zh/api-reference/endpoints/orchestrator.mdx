@@ -1,0 +1,82 @@
+---
+title: "编排器"
+description: "创建和管理多智能体任务运行。"
+---
+
+## 创建运行
+
+```
+POST /v1/orchestrator/runs
+```
+
+创建一个包含任务的新编排器运行。
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `tasks` | array | 任务定义数组 |
+| `tasks[].prompt` | string | 任务提示/指令 |
+| `tasks[].provider` | string | `claude`、`codex` 或 `gemini` |
+| `tasks[].model` | string | 模型标识符 |
+| `tasks[].workingDirectory` | string | 工作目录路径 |
+| `tasks[].dependsOn` | array | 此任务依赖的任务 ID |
+
+## 列出运行
+
+```
+GET /v1/orchestrator/runs
+```
+
+列出已认证用户的编排器运行。
+
+## 获取运行
+
+```
+GET /v1/orchestrator/runs/:runId
+```
+
+获取特定运行的详情，包括所有任务及其状态。
+
+**响应：**
+
+```json
+{
+  "id": "clx...",
+  "status": "running",
+  "tasks": [
+    {
+      "id": "clx...",
+      "prompt": "Set up database schema",
+      "provider": "claude",
+      "model": "sonnet-4-6",
+      "status": "completed",
+      "dependsOn": []
+    },
+    {
+      "id": "clx...",
+      "prompt": "Write API endpoints",
+      "provider": "claude",
+      "model": "sonnet-4-6",
+      "status": "running",
+      "dependsOn": ["clx..."]
+    }
+  ]
+}
+```
+
+## 取消运行
+
+```
+POST /v1/orchestrator/runs/:runId/cancel
+```
+
+取消正在进行的编排器运行。
+
+## 轮询完成状态
+
+```
+POST /v1/orchestrator/runs/:id/pend
+```
+
+长轮询等待运行完成或状态变更。

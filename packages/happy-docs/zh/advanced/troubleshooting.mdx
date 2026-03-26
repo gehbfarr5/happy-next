@@ -1,0 +1,86 @@
+---
+title: "故障排除"
+description: "常见问题及解决方法。"
+---
+
+## 诊断
+
+运行内置诊断工具：
+
+```bash
+happy doctor
+```
+
+这会检查你的系统是否存在常见问题：Node.js 版本、CLI 版本、守护进程状态、服务器连接性以及已安装的 AI 工具。
+
+重置缓存状态：
+
+```bash
+happy doctor clean
+```
+
+## 常见问题
+
+### CLI 无法启动
+
+**症状：** 运行 `happy` 时显示错误或卡住。
+
+**尝试：**
+1. 检查 Node.js 版本：`node --version`（必须为 20+）
+2. 验证 CLI 已安装：`happy --version`
+3. 检查 AI 工具是否已安装（例如，对于 Claude Code 运行 `claude --version`）
+4. 查看日志：`happy daemon logs`
+
+### 二维码不显示
+
+**症状：** 终端启动但没有显示二维码。
+
+**尝试：**
+1. 确保你的终端支持 Unicode 渲染
+2. 尝试使用其他终端（iTerm2、Windows Terminal 等）
+3. 检查服务器连接性：`happy doctor`
+
+### 移动应用无法连接
+
+**症状：** 扫描二维码后手机无法配对。
+
+**尝试：**
+1. 确保你的手机和电脑都能访问互联网
+2. 检查守护进程是否在运行：`happy daemon status`
+3. 重启守护进程：`happy daemon restart`
+4. 重新扫描二维码
+
+### 会话不同步
+
+**症状：** 从手机发送的消息没有出现在终端中（反之亦然）。
+
+**尝试：**
+1. 检查守护进程状态：`happy daemon status`
+2. 检查服务器连接性：`happy doctor`
+3. 重启守护进程：`happy daemon restart`
+4. 检查你的网络 — Happy 需要稳定的互联网连接才能同步
+
+### 守护进程持续崩溃
+
+**症状：** 守护进程意外停止。
+
+**尝试：**
+1. 查看日志：`happy daemon logs`
+2. 清理状态并重启：`happy doctor clean && happy daemon restart`
+3. 检查端口冲突：守护进程使用本地 HTTP 端口
+
+### 语音功能不工作
+
+**症状：** 点击麦克风图标后没有启动语音会话。
+
+**尝试：**
+1. 在 **设置 > 语音** 中检查语音提供商配置
+2. 确保已授予麦克风权限
+3. 对于 Happy Voice：验证网关 URL 和公钥
+4. 对于 ElevenLabs：验证你的 Agent ID 是否正确
+
+## 获取帮助
+
+- **GitHub Issues：** [github.com/hitosea/happy-next/issues](https://github.com/hitosea/happy-next/issues)
+- **日志：** `happy daemon logs` 显示最新的日志文件路径
+- **调试模式：** 设置 `HAPPY_EXPERIMENTAL=true` 以启用详细日志

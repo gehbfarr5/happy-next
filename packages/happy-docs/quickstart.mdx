@@ -1,0 +1,74 @@
+---
+title: "Quickstart"
+description: "Install Happy Next and control your first AI session from your phone in 5 minutes."
+---
+
+## Prerequisites
+
+- **Node.js 20+** installed on your development machine
+- **Claude Code**, **Codex**, or **Gemini CLI** installed (at least one)
+- A phone with the Happy Next app installed ([iOS (TestFlight)](https://testflight.apple.com/join/XyjvbhXe) / [Android (APK)](https://github.com/hitosea/happy-next/releases/latest))
+
+## Step 1: Install the CLI
+
+```bash
+npm install -g happy-next-cli
+```
+
+Verify the installation:
+
+```bash
+happy --version
+```
+
+## Step 2: Start a session
+
+Start a Claude Code session (the default):
+
+```bash
+happy
+```
+
+<Info>
+You can also start Codex or Gemini sessions:
+
+```bash
+happy codex    # Start an OpenAI Codex session
+happy gemini   # Start a Google Gemini session
+```
+</Info>
+
+On first run, Happy will display a **QR code** in your terminal.
+
+## Step 3: Pair your phone
+
+1. Open the Happy app on your phone
+2. Tap the **scan** icon on the home screen
+3. Scan the QR code displayed in your terminal
+
+Your phone is now connected to your AI coding session.
+
+## Step 4: Send a message from your phone
+
+Open the session in the Happy app and type a message — for example:
+
+> List all files in the current directory
+
+You'll see the AI agent execute the command in your terminal, and the response will appear on your phone in real time.
+
+## What's next?
+
+<CardGroup cols={2}>
+  <Card title="Core Concepts" icon="lightbulb" href="/concepts">
+    Understand how sessions, machines, and agents work together.
+  </Card>
+  <Card title="CLI Configuration" icon="terminal" href="/cli/installation">
+    Learn about models, permissions, and environment variables.
+  </Card>
+  <Card title="Orchestrator" icon="diagram-project" href="/cli/orchestrator">
+    Dispatch multi-agent workflows.
+  </Card>
+  <Card title="Voice Control" icon="microphone" href="/voice/overview">
+    Talk to your AI agent instead of typing.
+  </Card>
+</CardGroup>

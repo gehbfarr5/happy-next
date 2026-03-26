@@ -1,0 +1,74 @@
+---
+title: "快速开始"
+description: "安装 Happy Next，5 分钟内从手机控制你的第一个 AI 会话。"
+---
+
+## 前置条件
+
+- 开发机器上已安装 **Node.js 20+**
+- 已安装 **Claude Code**、**Codex** 或 **Gemini CLI**（至少一个）
+- 手机上已安装 Happy Next 应用（[iOS (TestFlight)](https://testflight.apple.com/join/XyjvbhXe) / [Android (APK)](https://github.com/hitosea/happy-next/releases/latest)）
+
+## 第 1 步：安装 CLI
+
+```bash
+npm install -g happy-next-cli
+```
+
+验证安装：
+
+```bash
+happy --version
+```
+
+## 第 2 步：启动会话
+
+启动一个 Claude Code 会话（默认）：
+
+```bash
+happy
+```
+
+<Info>
+你也可以启动 Codex 或 Gemini 会话：
+
+```bash
+happy codex    # 启动 OpenAI Codex 会话
+happy gemini   # 启动 Google Gemini 会话
+```
+</Info>
+
+首次运行时，Happy 会在终端中显示一个**二维码**。
+
+## 第 3 步：配对手机
+
+1. 在手机上打开 Happy 应用
+2. 点击主页上的**扫描**图标
+3. 扫描终端中显示的二维码
+
+你的手机现在已连接到 AI 编程会话。
+
+## 第 4 步：从手机发送消息
+
+在 Happy 应用中打开会话并输入一条消息——例如：
+
+> 列出当前目录中的所有文件
+
+你会看到 AI 代理在终端中执行该命令，响应结果将实时显示在你的手机上。
+
+## 接下来
+
+<CardGroup cols={2}>
+  <Card title="核心概念" icon="lightbulb" href="/zh/concepts">
+    了解会话、机器和代理如何协同工作。
+  </Card>
+  <Card title="CLI 配置" icon="terminal" href="/cli/installation">
+    了解模型、权限和环境变量。
+  </Card>
+  <Card title="编排器" icon="diagram-project" href="/cli/orchestrator">
+    调度多代理工作流。
+  </Card>
+  <Card title="语音控制" icon="microphone" href="/voice/overview">
+    用语音与 AI 代理对话，无需打字。
+  </Card>
+</CardGroup>

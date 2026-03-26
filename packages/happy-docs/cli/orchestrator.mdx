@@ -1,0 +1,122 @@
+---
+title: "Orchestrator"
+description: "Dispatch multi-agent workflows with dependency graphs."
+---
+
+The Orchestrator lets you define multi-step tasks and dispatch them across multiple AI agents (Claude, Codex, Gemini) with dependency management.
+
+## What is it?
+
+Think of it as a task DAG (Directed Acyclic Graph) for AI coding agents. You define tasks with prompts, choose which agent and model runs each task, and specify dependencies between them. The orchestrator executes them in the right order, parallelizing where possible.
+
+## Creating a run
+
+Orchestrator runs are created through the **mobile app** or the **API**. Each run contains:
+
+- **Tasks** — Individual units of work, each with:
+  - A prompt describing what to do
+  - A provider (Claude, Codex, or Gemini)
+  - A model selection
+  - An optional working directory
+  - Dependencies on other tasks
+- **Dependency graph** — Tasks can depend on other tasks, forming a DAG
+
+## How to use
+
+Send a natural language prompt in any Happy session describing what you want to orchestrate. The AI will automatically call the Orchestrator to dispatch tasks. Key phrases:
+
+| Intent | Keywords |
+|--------|----------|
+| Run tasks in parallel | "simultaneously", "in parallel", "at the same time" |
+| Control order | "first... then...", "after completion" |
+| Use different agents | "dispatch to Claude/Codex/Gemini" |
+| Run in background | "async mode", "in the background" |
+| Specify model | "using opus", "with gpt-5.4" |
+
+## Examples
+
+### Parallel: multi-perspective code review
+
+Dispatch the same file to three agents for different review angles:
+
+```
+Dispatch three tasks to review orchestratorRoutes.ts simultaneously:
+- One for security (injection, permissions, input validation)
+- One for performance (N+1 queries, unnecessary awaits)
+- One for correctness (edge cases, race conditions, error handling)
+Assign them to Claude, Codex, and Gemini respectively. Summarize the results.
+```
+
+### DAG: design → implement → verify pipeline
+
+Chain tasks with dependencies so each step builds on the previous:
+
+```
+Help me develop a "data export" feature, arranged in this order:
+1. First dispatch to Claude: design the API interface (Zod schema, support CSV/JSON)
+2. After design is done, dispatch in parallel: Codex implements the backend (happy-server) and frontend (happy-app)
+3. After both are done, run type checking to verify
+
+Use the orchestrator to orchestrate this pipeline.
+```
+
+### Parallel: PR pre-flight checks
+
+Run all checks in parallel before submitting a pull request:
+
+```
+I'm about to submit a PR. Arrange parallel checks:
+1. TypeScript type checking (all packages)
+2. Unit tests
+3. After lint and type checking both pass, run integration tests
+Summarize all results.
+```
+
+### Cross-provider: let different AIs compete
+
+Give the same task to different agents and compare their approaches:
+
+```
+Dispatch the same task to Claude, Codex, and Gemini: each designs a REST API
+pagination approach independently. I'll compare and choose the best one.
+```
+
+### DAG: bug investigation
+
+Investigate a bug from multiple angles simultaneously:
+
+```
+There's a bug: user tokens occasionally expire after login. Arrange three
+parallel investigations:
+- Check token generation and verification logic
+- Check session expiration and refresh mechanism
+- Check related middleware and error handling
+Investigate in parallel, then summarize findings.
+```
+
+## DAG visualization
+
+A typical orchestrator run with dependencies:
+
+```
+Task 1: "Design API schema" (Claude, opus-4-6)
+    ↓
+Task 2: "Implement backend" (Claude, sonnet-4-6)    depends on Task 1
+Task 3: "Implement frontend" (Codex, gpt-5.4)       depends on Task 1
+    ↓
+Task 4: "Run tests" (Gemini, gemini-2.5-pro)        depends on Task 2 + 3
+```
+
+Tasks 2 and 3 run in parallel after Task 1 completes. Task 4 waits for both.
+
+## Monitoring
+
+Track orchestrator runs from the mobile app:
+- See real-time status of each task (pending, running, completed, failed)
+- View task output and logs
+- Cancel a run if needed
+- Send follow-up messages to individual tasks
+
+## Using the API
+
+Create and manage orchestrator runs programmatically. See the [Orchestrator API](/api-reference/endpoints/orchestrator) for details.

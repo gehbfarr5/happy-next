@@ -1,0 +1,35 @@
+---
+title: "Codex Mode"
+description: "Use Happy Next with OpenAI Codex for AI-powered coding."
+---
+
+Start a Codex session with:
+
+```bash
+happy codex
+```
+
+## Prerequisites
+
+Install the [Codex CLI](https://github.com/openai/codex) and ensure you have a valid OpenAI API key configured.
+
+You can connect your OpenAI credentials through Happy:
+
+```bash
+happy connect codex
+```
+
+## Model selection
+
+Codex supports several models with different capability levels. Set the model when starting a session — model selection is handled through the mobile app or session configuration.
+
+Available models include:
+- `gpt-5.4` — Latest, most capable
+- `gpt-5.3-codex` — Optimized for code
+- `gpt-5.2-codex` — Previous generation
+- `gpt-5.1-codex-max` — Maximum reasoning
+- `gpt-5.1-codex-mini` — Lightweight, fast
+
+## How it works
+
+Under the hood, Happy starts the Codex `app-server` and communicates via JSON-RPC. The mobile app and voice features work identically to Claude mode — you can send messages, approve permissions, and monitor progress from your phone.

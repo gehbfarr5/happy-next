@@ -1,0 +1,99 @@
+---
+title: "Sessions"
+description: "Create, manage, and interact with AI coding sessions."
+---
+
+## List sessions
+
+```
+GET /v1/sessions
+```
+
+List all sessions for the authenticated user.
+
+## List active sessions
+
+```
+GET /v2/sessions/active
+```
+
+List only active (non-ended) sessions.
+
+## Create session
+
+```
+POST /v1/sessions
+```
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `machineId` | string | Target machine ID |
+| `metadata` | string | Encrypted session metadata |
+| `encryptionKey` | string | Encrypted session key |
+
+## Get session
+
+```
+GET /v1/sessions/:id
+```
+
+Get a session by ID.
+
+## Update session
+
+```
+PATCH /v1/sessions/:id
+```
+
+Update session metadata or state.
+
+## Delete session
+
+```
+DELETE /v1/sessions/:id
+```
+
+Delete a session permanently.
+
+## Send message
+
+```
+POST /v3/sessions/:id/messages
+```
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `content` | string | Encrypted message content (ciphertext string) |
+| `localId` | string | Client-generated ID for deduplication |
+
+**Response:**
+
+```json
+{
+  "id": "clx...",
+  "seq": 42,
+  "localId": "local-123",
+  "content": "encrypted-ciphertext-string...",
+  "createdAt": "2026-03-26T00:00:00.000Z"
+}
+```
+
+## Get messages
+
+```
+GET /v3/sessions/:id/messages
+```
+
+Fetch message history with pagination.
+
+**Query parameters:**
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `before` | number | Get messages before this sequence number |
+| `after` | number | Get messages after this sequence number |
+| `limit` | number | Max messages to return (default: 50) |

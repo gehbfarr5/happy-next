@@ -1,0 +1,84 @@
+---
+title: "共享"
+description: "与其他用户共享会话或通过公开链接共享。"
+---
+
+## 私密共享
+
+### 列出共享
+
+```
+GET /v1/sessions/:sessionId/shares
+```
+
+列出会话共享的所有用户（仅所有者可用）。
+
+### 与用户共享
+
+```
+POST /v1/sessions/:sessionId/shares
+```
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `userId` | string | 目标用户 ID |
+| `accessLevel` | string | `view`、`edit` 或 `admin` |
+| `encryptedKey` | string | 为接收者加密的会话密钥 |
+
+### 更新访问级别
+
+```
+PATCH /v1/sessions/:sessionId/shares/:userId
+```
+
+更改用户的访问级别。
+
+### 撤销共享
+
+```
+DELETE /v1/sessions/:sessionId/shares/:userId
+```
+
+移除用户对共享会话的访问权限。
+
+## 公开共享
+
+### 创建公开链接
+
+```
+POST /v1/sessions/:sessionId/public-share
+```
+
+**请求体：**
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `expiresAt` | string | 可选的过期时间（ISO 8601） |
+| `maxUses` | number | 可选的最大使用次数 |
+
+**响应：**
+
+```json
+{
+  "token": "abc123...",
+  "url": "https://app.happy-next.com/share/abc123..."
+}
+```
+
+### 访问公开会话
+
+```
+GET /v1/public-sessions/:token
+```
+
+通过令牌访问公开共享的会话。
+
+### 删除公开链接
+
+```
+DELETE /v1/sessions/:sessionId/public-share
+```
+
+删除公开共享链接，撤销所有访问权限。

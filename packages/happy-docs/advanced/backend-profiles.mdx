@@ -1,0 +1,96 @@
+---
+title: "Backend Profiles"
+description: "Use alternative LLM providers like DeepSeek, Z.AI, or Azure OpenAI."
+---
+
+Backend Profiles let you swap the LLM provider behind your AI coding sessions. Instead of using the default Anthropic/OpenAI/Google APIs, you can connect to alternative providers like DeepSeek, Z.AI, or your own Azure OpenAI deployment.
+
+## Built-in presets
+
+Happy includes 6 presets:
+
+| Profile | Agent | Provider | Model |
+|---------|-------|----------|-------|
+| **Anthropic** (default) | Claude | Anthropic | Claude Sonnet/Opus/Haiku |
+| **DeepSeek** | Claude | DeepSeek | deepseek-reasoner |
+| **Z.AI** | Claude | Zhipu AI | GLM-5.0 |
+| **OpenAI** | Codex | OpenAI | gpt-5.3-codex |
+| **Azure OpenAI** | Codex | Azure | gpt-5.3-codex |
+| **Google AI** | Gemini | Google | gemini-3-pro-preview |
+
+Each preset is read-only but can be duplicated as a custom profile.
+
+## Switching profiles
+
+1. In the Happy app, go to **Settings > Profiles**
+2. Tap a profile to activate it
+3. New sessions will use the selected profile's provider
+
+## Setting up a provider
+
+Most alternative providers require an API key. The key is set as an **environment variable on the machine running the daemon**, then referenced by the profile using template syntax.
+
+### Example: DeepSeek
+
+1. Start the daemon with your DeepSeek key:
+
+```bash
+DEEPSEEK_AUTH_TOKEN=sk-your-key happy daemon restart
+```
+
+2. In the app, go to **Settings > Profiles** and activate the **DeepSeek** preset
+
+3. Create a new Claude session — it now routes through DeepSeek's API
+
+The profile maps `DEEPSEEK_AUTH_TOKEN` → `ANTHROPIC_AUTH_TOKEN` automatically, so Claude Code connects to DeepSeek's API-compatible endpoint instead of Anthropic.
+
+### Example: Z.AI
+
+```bash
+Z_AI_AUTH_TOKEN=your-key happy daemon restart
+```
+
+Then activate the **Z.AI** preset. Sessions will use GLM-5.0 via Zhipu AI's Anthropic-compatible API.
+
+### Example: Azure OpenAI
+
+```bash
+AZURE_OPENAI_API_KEY=your-key AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com happy daemon restart
+```
+
+Then activate the **Azure OpenAI** preset for Codex sessions.
+
+## Creating custom profiles
+
+1. Go to **Settings > Profiles**
+2. Tap **+ Add Profile** (or duplicate a built-in preset)
+3. Configure:
+   - **Name** — A descriptive name
+   - **Agent compatibility** — Which agents this profile works with (Claude, Codex, Gemini)
+   - **Environment variables** — Key-value pairs passed to the AI agent process
+   - **Default permission mode** — Session permission mode
+   - **Tmux** — Optional: run sessions inside tmux
+   - **Startup script** — Optional: bash script executed before each session
+
+## Template syntax
+
+Environment variable values support bash-style parameter expansion:
+
+| Syntax | Meaning |
+|--------|---------|
+| `${VAR}` | Use the value of `VAR` from the daemon's environment |
+| `${VAR:-default}` | Use `VAR` if set, otherwise use `default` |
+| `literal-value` | Use the value as-is |
+
+This lets you keep secrets in the daemon environment and reference them from profiles, rather than storing them in the app.
+
+## How it works
+
+```
+1. You set API keys as env vars on your machine
+2. Profile defines template mappings (e.g., ANTHROPIC_AUTH_TOKEN=${DEEPSEEK_AUTH_TOKEN})
+3. Daemon expands templates when spawning a session
+4. AI agent (Claude Code) sees the expanded values and connects to the alternative provider
+```
+
+Profiles are synced between the app and CLI automatically. The daemon reads the active profile from `~/.happy/settings.json` when spawning new sessions.

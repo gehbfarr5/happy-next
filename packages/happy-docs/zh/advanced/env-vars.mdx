@@ -1,0 +1,117 @@
+---
+title: "环境变量"
+description: "Happy Next 所有环境变量的完整参考。"
+---
+
+## CLI
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `HAPPY_SERVER_URL` | `https://api.happy-next.com` | Happy 服务器 API 端点 |
+| `HAPPY_WEBAPP_URL` | `https://app.happy-next.com` | Happy Web 应用 URL |
+| `HAPPY_HOME_DIR` | `~/.happy` | 本地数据目录 |
+| `HAPPY_VARIANT` | `stable` | `stable` 或 `dev`（并行运行两个版本） |
+| `HAPPY_EXPERIMENTAL` | — | 启用实验性功能（`true`/`1`/`yes`） |
+| `HAPPY_DISABLE_CAFFEINATE` | — | 禁用 macOS 睡眠阻止 |
+| `HAPPY_EXTRA_MCP_SERVERS` | — | 附加 MCP 服务器（JSON） |
+| `GEMINI_MODEL` | — | 覆盖默认 Gemini 模型 |
+| `GOOGLE_CLOUD_PROJECT` | — | Google Cloud 项目 ID（Workspace 账户） |
+
+## 服务器
+
+### 必需
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `DATABASE_URL` | — | PostgreSQL 连接字符串 |
+| `HANDY_MASTER_SECRET` | — | 主加密密钥（64 个字符以上） |
+| `PORT` | `3005` | HTTP 服务器端口 |
+
+### 可选
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `NODE_ENV` | `development` | `development` 或 `production` |
+| `REDIS_URL` | — | Redis 连接字符串 |
+| `APP_URL` | — | 公共服务器 URL |
+| `METRICS_ENABLED` | `false` | 启用 Prometheus 指标 |
+| `METRICS_PORT` | `9090` | 指标端点端口 |
+
+### 文件存储（S3/MinIO）
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `S3_HOST` | — | S3 主机名 |
+| `S3_PORT` | — | S3 端口 |
+| `S3_USE_SSL` | `false` | 对 S3 使用 HTTPS |
+| `S3_ACCESS_KEY` | — | S3 访问密钥 |
+| `S3_SECRET_KEY` | — | S3 秘密密钥 |
+| `S3_BUCKET` | — | S3 存储桶名称 |
+| `S3_PUBLIC_URL` | — | 上传文件的公共 URL |
+
+### GitHub OAuth
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `GITHUB_APP_ID` | — | GitHub App ID |
+| `GITHUB_PRIVATE_KEY` | — | GitHub App 私钥 |
+| `GITHUB_CLIENT_ID` | — | OAuth 客户端 ID |
+| `GITHUB_CLIENT_SECRET` | — | OAuth 客户端密钥 |
+| `GITHUB_REDIRECT_URL` | — | OAuth 回调 URL |
+| `GITHUB_WEBHOOK_SECRET` | — | Webhook 签名密钥 |
+
+### 语音
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `ELEVENLABS_AGENT_ID` | — | ElevenLabs 语音代理 ID |
+| `VOICE_TOOL_BRIDGE_KEY` | — | 语音工具桥接授权密钥 |
+
+## 语音网关（happy-voice）
+
+### 管线
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `AGENT_STT` | `openai/gpt-4o-mini-transcribe:zh` | 语音转文字模型 |
+| `AGENT_LLM` | `openai/gpt-4.1-mini` | 语音代理 LLM |
+| `AGENT_TTS` | `cartesia/sonic-3:...` | 文字转语音模型 |
+| `AGENT_WELCOME_MESSAGE` | — | 自定义欢迎消息 |
+
+### LiveKit
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `LIVEKIT_URL` | — | LiveKit 服务器 URL（必需） |
+| `LIVEKIT_API_KEY` | — | LiveKit API 密钥（必需） |
+| `LIVEKIT_API_SECRET` | — | LiveKit API 密钥（必需） |
+| `LIVEKIT_AGENT_NAME` | `happy-voice-agent` | 代理注册名称 |
+| `LIVEKIT_ROOM_TTL_SECONDS` | `3600` | 房间自动清理超时 |
+| `LIVEKIT_TOKEN_TTL_SECONDS` | `600` | 参与者令牌有效期 |
+
+### 服务器
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `HOST` | `0.0.0.0` | API 服务器主机 |
+| `PORT` | `3040` | API 服务器端口 |
+| `VOICE_PUBLIC_KEY` | — | API 授权密钥（必需） |
+
+### 语音调优
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `AGENT_MIN_ENDPOINTING_DELAY_MS` | `1600` | 语音结束前的最小静默时间 |
+| `AGENT_MAX_ENDPOINTING_DELAY_MS` | `7000` | 最大静默容忍时间 |
+| `AGENT_VAD_ACTIVATION_THRESHOLD` | `0.5` | 语音活动检测阈值（0-1） |
+
+## 应用
+
+| 变量 | 默认值 | 描述 |
+|----------|---------|-------------|
+| `APP_ENV` | — | `development`、`preview` 或 `production` |
+| `EXPO_PUBLIC_POSTHOG_API_KEY` | — | PostHog 分析密钥 |
+| `EXPO_PUBLIC_ELEVENLABS_AGENT_ID` | — | ElevenLabs 语音代理 ID |
+| `EXPO_PUBLIC_VOICE_PROVIDER` | — | 语音提供商（`elevenlabs` 或 `happy-voice`） |
+| `EXPO_PUBLIC_VOICE_BASE_URL` | — | 语音网关 URL |
+| `EXPO_PUBLIC_VOICE_PUBLIC_KEY` | — | 语音网关公钥 |

@@ -1,0 +1,91 @@
+---
+title: "Voice"
+description: "Manage voice sessions through the Happy Voice gateway."
+---
+
+These endpoints are served by the **Happy Voice gateway** (not the main Happy server). They require the `X-Voice-Key` header or `Authorization: Bearer` with the voice public key.
+
+## Start session
+
+```
+POST /v1/voice/session/start
+```
+
+Create a new voice session.
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `userId` | string | User identifier |
+| `sessionId` | string | App session ID to associate with |
+| `language` | string | Language code (e.g., `en`, `zh`) |
+| `initialContextPayload` | object | Initial context for the voice agent |
+| `toolBridgeBaseUrl` | string | Happy Server URL for tool calls |
+| `welcomeMessage` | string | Optional custom greeting |
+
+**Response:**
+
+```json
+{
+  "allowed": true,
+  "gatewaySessionId": "uuid",
+  "roomName": "happy_voice_...",
+  "roomUrl": "wss://livekit.example.com",
+  "participantIdentity": "human_...",
+  "participantToken": "jwt-token...",
+  "expiresAt": "2026-03-26T01:00:00.000Z"
+}
+```
+
+## Stop session
+
+```
+POST /v1/voice/session/stop
+```
+
+Stop a voice session and clean up the room.
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `gatewaySessionId` | string | Session ID from start response |
+
+## Get session status
+
+```
+GET /v1/voice/session/:gatewaySessionId/status
+```
+
+Query the current status of a voice session.
+
+## Send text
+
+```
+POST /v1/voice/session/text
+```
+
+Inject a text message into the voice session.
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `gatewaySessionId` | string | Session ID |
+| `text` | string | Text to inject |
+
+## Send context
+
+```
+POST /v1/voice/session/context
+```
+
+Send app context to the voice agent.
+
+**Request body:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `gatewaySessionId` | string | Session ID |
+| `payload` | object | Context payload (session state, messages, etc.) |

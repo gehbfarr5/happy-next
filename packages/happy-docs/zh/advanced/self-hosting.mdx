@@ -1,0 +1,109 @@
+---
+title: "自托管"
+description: "部署你自己的 Happy Next 服务器，完全掌控你的数据。"
+---
+
+你可以托管自己的 Happy 服务器，而不是使用 `api.happy-next.com` 上的托管服务。这让你完全掌控自己的数据和基础设施。
+
+Happy 支持两种模式：
+- **托管（默认）** — 客户端开箱即用地使用 `https://api.happy-next.com`
+- **自托管** — 使用 Docker Compose 运行你自己的 `happy-server`、`happy-voice` 和支持服务
+
+## 环境要求
+
+- **Docker + Docker Compose**
+- **LiveKit 部署**（未包含在 `docker-compose.yml` 中）— 用于语音功能
+  - 你需要 `LIVEKIT_URL`、`LIVEKIT_WS_URL`、`LIVEKIT_API_KEY`、`LIVEKIT_API_SECRET`
+- 语音提供商的 **API 密钥**（如果使用语音功能）
+  - `OPENAI_API_KEY`、`CARTESIA_API_KEY`
+
+## 快速开始
+
+1. 克隆仓库：
+
+```bash
+git clone https://github.com/hitosea/happy-next.git
+cd happy-next
+```
+
+2. 创建环境配置文件：
+
+```bash
+cp .env.example .env
+```
+
+3. 编辑 `.env` 并填写必需的值。至少需要：
+   - `HANDY_MASTER_SECRET` — 生成一个 64 个字符以上的随机字符串
+   - `POSTGRES_*` — 数据库凭据
+   - `S3_*` — 或使用 MinIO 默认配置
+   - `LIVEKIT_*` + 语音 API 密钥 — 如果使用语音功能
+
+4. 启动服务栈：
+
+```bash
+docker-compose up -d
+```
+
+5. 应用数据库迁移（仅首次运行需要）：
+
+```bash
+docker-compose exec happy-server yarn --cwd packages/happy-server prisma migrate deploy
+```
+
+6. 在 `http://localhost:3030` 打开 Web 应用。
+
+## 服务
+
+Docker Compose 服务栈包含：
+
+| 服务 | 端口 | 描述 |
+|---------|------|-------------|
+| `happy-app` | 3030 | Web 应用（Nginx） |
+| `happy-server` | 3031 | API 服务器（Node.js） |
+| `happy-voice` | 3040 | 语音网关（Node.js） |
+| `minio` | 3050 | S3 兼容文件存储 |
+| `postgres` | 5432 | 数据库 |
+| `redis` | 6379 | 缓存和 Socket.IO 适配器 |
+
+## 连接 CLI
+
+CLI 默认连接托管 API。对于自托管，设置环境变量：
+
+```bash
+HAPPY_SERVER_URL=http://localhost:3031 HAPPY_WEBAPP_URL=http://localhost:3030 happy
+```
+
+## 连接移动应用
+
+- **开发构建：** 启动 Expo 时设置 `EXPO_PUBLIC_HAPPY_SERVER_URL`，或使用应用内的服务器设置界面
+- **生产构建：** 使用应用内的服务器设置界面设置自定义服务器 URL
+
+## S3 / MinIO 说明
+
+`S3_PUBLIC_URL` 必须可被客户端（浏览器和移动端）访问，而不仅仅是 Docker 容器。
+
+- **本地：** MinIO 在 `http://localhost:3050` 暴露，因此 `S3_PUBLIC_URL=http://localhost:3050` 可以使用
+- **远程：** 使用真实的 S3 兼容端点，并配置与你的 TLS/主机设置匹配的公共 URL
+
+## 远程访问
+
+如果从其他设备（局域网或互联网）访问，请避免硬编码 `localhost` URL：
+
+- 将 Web 应用、API 和语音网关放在带 TLS 的域名后面
+- 将 `EXPO_PUBLIC_HAPPY_SERVER_URL` 和 `EXPO_PUBLIC_VOICE_BASE_URL` 设置为这些公共来源
+- 将 `APP_URL` 设置为你的 Web 来源
+
+## 故障排除
+
+```bash
+# 检查容器状态
+docker-compose ps
+
+# 查看日志
+docker-compose logs -f happy-server
+docker-compose logs -f happy-voice
+```
+
+验证主机上的端口：Web (3030)、API (3031)、Voice (3040)、MinIO (3050)。
+
+完整的配置参考请参阅[环境变量](/zh/advanced/env-vars)。

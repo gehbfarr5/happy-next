@@ -1,0 +1,96 @@
+---
+title: "后端配置文件"
+description: "使用 DeepSeek、Z.AI 或 Azure OpenAI 等替代 LLM 提供商。"
+---
+
+后端配置文件允许你切换 AI 编程会话背后的 LLM 提供商。你可以连接到 DeepSeek、Z.AI 或你自己的 Azure OpenAI 部署等替代提供商，而不是使用默认的 Anthropic/OpenAI/Google API。
+
+## 内置预设
+
+Happy 包含 6 个预设：
+
+| 配置文件 | 代理 | 提供商 | 模型 |
+|---------|-------|----------|-------|
+| **Anthropic**（默认） | Claude | Anthropic | Claude Sonnet/Opus/Haiku |
+| **DeepSeek** | Claude | DeepSeek | deepseek-reasoner |
+| **Z.AI** | Claude | Zhipu AI | GLM-5.0 |
+| **OpenAI** | Codex | OpenAI | gpt-5.3-codex |
+| **Azure OpenAI** | Codex | Azure | gpt-5.3-codex |
+| **Google AI** | Gemini | Google | gemini-3-pro-preview |
+
+每个预设都是只读的，但可以复制为自定义配置文件。
+
+## 切换配置文件
+
+1. 在 Happy 应用中，前往 **设置 > 配置文件**
+2. 点击一个配置文件以激活它
+3. 新会话将使用所选配置文件的提供商
+
+## 设置提供商
+
+大多数替代提供商需要 API 密钥。密钥以**运行守护进程的机器上的环境变量**形式设置，然后由配置文件通过模板语法引用。
+
+### 示例：DeepSeek
+
+1. 使用你的 DeepSeek 密钥启动守护进程：
+
+```bash
+DEEPSEEK_AUTH_TOKEN=sk-your-key happy daemon restart
+```
+
+2. 在应用中，前往 **设置 > 配置文件** 并激活 **DeepSeek** 预设
+
+3. 创建一个新的 Claude 会话 — 现在它会通过 DeepSeek 的 API 路由
+
+配置文件会自动将 `DEEPSEEK_AUTH_TOKEN` 映射为 `ANTHROPIC_AUTH_TOKEN`，因此 Claude Code 会连接到 DeepSeek 的 API 兼容端点，而不是 Anthropic。
+
+### 示例：Z.AI
+
+```bash
+Z_AI_AUTH_TOKEN=your-key happy daemon restart
+```
+
+然后激活 **Z.AI** 预设。会话将通过智谱 AI 的 Anthropic 兼容 API 使用 GLM-5.0。
+
+### 示例：Azure OpenAI
+
+```bash
+AZURE_OPENAI_API_KEY=your-key AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com happy daemon restart
+```
+
+然后为 Codex 会话激活 **Azure OpenAI** 预设。
+
+## 创建自定义配置文件
+
+1. 前往 **设置 > 配置文件**
+2. 点击 **+ 添加配置文件**（或复制一个内置预设）
+3. 配置：
+   - **名称** — 一个描述性名称
+   - **代理兼容性** — 此配置文件适用于哪些代理（Claude、Codex、Gemini）
+   - **环境变量** — 传递给 AI 代理进程的键值对
+   - **默认权限模式** — 会话权限模式
+   - **Tmux** — 可选：在 tmux 中运行会话
+   - **启动脚本** — 可选：每个会话开始前执行的 bash 脚本
+
+## 模板语法
+
+环境变量值支持 bash 风格的参数展开：
+
+| 语法 | 含义 |
+|--------|---------|
+| `${VAR}` | 使用守护进程环境中 `VAR` 的值 |
+| `${VAR:-default}` | 如果 `VAR` 已设置则使用它，否则使用 `default` |
+| `literal-value` | 直接使用该值 |
+
+这样你可以将密钥保存在守护进程环境中，并从配置文件中引用它们，而不是将它们存储在应用中。
+
+## 工作原理
+
+```
+1. 你在机器上将 API 密钥设置为环境变量
+2. 配置文件定义模板映射（例如 ANTHROPIC_AUTH_TOKEN=${DEEPSEEK_AUTH_TOKEN}）
+3. 守护进程在创建会话时展开模板
+4. AI 代理（Claude Code）看到展开后的值并连接到替代提供商
+```
+
+配置文件在应用和 CLI 之间自动同步。守护进程在创建新会话时从 `~/.happy/settings.json` 读取活动配置文件。

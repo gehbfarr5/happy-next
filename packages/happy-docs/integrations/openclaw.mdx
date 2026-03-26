@@ -1,0 +1,57 @@
+---
+title: "OpenClaw"
+description: "Connect to external AI machines from the Happy app."
+---
+
+OpenClaw lets you connect to and control **external AI machines** directly from the Happy app. If you have an OpenClaw-compatible AI system running on your network or a remote server, you can manage it from your phone alongside your Happy sessions.
+
+## Connection modes
+
+OpenClaw supports two ways to connect:
+
+| Mode | How it works | Best for |
+|------|-------------|----------|
+| **Happy relay** | Routes through your Happy CLI daemon to reach the OpenClaw gateway | Machines on your local network, behind a firewall |
+| **Direct** | Connects directly from your phone to the OpenClaw gateway via WebSocket | Machines accessible over the internet |
+
+## Adding a machine
+
+1. In the Happy app, navigate to **OpenClaw**
+2. Tap **+** to add a new machine
+3. Choose the connection type:
+
+**Happy relay:**
+- Select one of your online Happy devices from the list
+- Optionally enter a gateway token or password
+
+**Direct:**
+- Enter the OpenClaw gateway URL (e.g., `ws://192.168.1.100:18789`)
+- Optionally enter a token or password
+
+A device keypair (Ed25519) is automatically generated for authentication. All connection credentials are end-to-end encrypted before being stored on the server.
+
+## Using OpenClaw
+
+Once connected, you can:
+
+- **Browse sessions** — View all sessions on the machine (direct, group, or global)
+- **Chat** — Send messages and receive streaming AI responses with markdown rendering
+- **Create sessions** — Start new direct or global sessions
+- **Monitor status** — See real-time connection status (online/offline) for each machine
+
+## Authentication
+
+OpenClaw uses a challenge-response authentication flow:
+
+1. The gateway sends a challenge with a nonce
+2. Your device signs it with its Ed25519 private key
+3. The gateway verifies and grants access
+4. A device token may be issued for future connections
+
+If the device hasn't been paired yet, you'll see a "pairing required" status — approve the device on the OpenClaw gateway side to complete the setup.
+
+## Managing machines
+
+- **View machines** — The OpenClaw screen shows all configured machines with their connection status
+- **Edit** — Update connection details or credentials
+- **Delete** — Remove a machine and its stored credentials
