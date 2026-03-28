@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { View, Text, Pressable, Platform, ActivityIndicator } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import Svg, { Path, G } from 'react-native-svg';
 import { Image } from 'expo-image';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
@@ -10,6 +11,8 @@ import { Typography } from '@/constants/Typography';
 import { HtmlContent } from '@/components/dootask/HtmlContent';
 import type { DooTaskDialogMsg, PendingMessageStatus, EmojiReaction } from '@/sync/dootask/types';
 import { useDootaskAudioPlayer } from '@/hooks/useAudioPlayer';
+import { useWebHorizontalScroll } from '@/hooks/useWebHorizontalScroll';
+import { splitTableRow } from '@/components/markdown/parseMarkdownBlock';
 
 // --- AI Assistant ---
 
@@ -267,6 +270,25 @@ function MarkdownContent({ text, theme, serverUrl, onImagePress }: {
                 continue;
             }
 
+            // Table: header row + separator row (e.g. |---|---|)
+            if (line.includes('|') && i + 1 < lines.length) {
+                const nextLine = lines[i + 1].trim();
+                if (/^[|\s\-:=]*$/.test(nextLine) && nextLine.includes('-') && nextLine.includes('|')) {
+                    const headerCells = splitTableRow(line);
+                    let j = i + 2; // skip header + separator
+                    const dataRows: string[][] = [];
+                    while (j < lines.length && lines[j].includes('|')) {
+                        dataRows.push(splitTableRow(lines[j]));
+                        j++;
+                    }
+                    elements.push(
+                        <RenderMdTable key={ki++} headers={headerCells} rows={dataRows} theme={theme} />,
+                    );
+                    i = j - 1; // -1 because for-loop increments
+                    continue;
+                }
+            }
+
             // Image on its own line
             const img = line.match(/^!\[([^\]]*)\]\(([^)]+)\)\s*$/);
             if (img) {
@@ -291,6 +313,118 @@ function MarkdownContent({ text, theme, serverUrl, onImagePress }: {
     return <View>{elements}</View>;
 }
 
+// Column-first table rendering with synchronized row heights (same as MarkdownView)
+function RenderMdTable({ headers, rows, theme }: {
+    headers: string[]; rows: string[][]; theme: any;
+}) {
+    const columnCount = headers.length;
+    const rowCount = rows.length;
+    const totalRows = 1 + rowCount;
+
+    const [rowHeights, setRowHeights] = React.useState<(number | undefined)[]>(() => new Array(totalRows).fill(undefined));
+    const measuredRef = React.useRef<number[][]>(
+        Array.from({ length: totalRows }, () => new Array(columnCount).fill(0)),
+    );
+    const rowLockedRef = React.useRef<boolean[]>(new Array(totalRows).fill(false));
+    const containerWidthRef = React.useRef(0);
+
+    const resetMeasurements = React.useCallback(() => {
+        const arr: number[][] = [];
+        for (let i = 0; i < totalRows; i++) arr.push(new Array(columnCount).fill(0));
+        measuredRef.current = arr;
+        rowLockedRef.current = new Array(totalRows).fill(false);
+        setRowHeights(new Array(totalRows).fill(undefined));
+    }, [totalRows, columnCount]);
+
+    React.useEffect(() => { resetMeasurements(); }, [resetMeasurements]);
+
+    const handleContainerLayout = React.useCallback((e: any) => {
+        const width = Math.round(e.nativeEvent.layout.width || 0);
+        if (width <= 0) { containerWidthRef.current = 0; return; }
+        if (containerWidthRef.current !== width) {
+            containerWidthRef.current = width;
+            resetMeasurements();
+        }
+    }, [resetMeasurements]);
+
+    const handleCellLayout = React.useCallback((rowIndex: number, colIndex: number, height: number) => {
+        if (containerWidthRef.current <= 0) return;
+        if (rowLockedRef.current[rowIndex]) return;
+        const h = Math.ceil(height);
+        if (h <= 1) return;
+        const grid = measuredRef.current;
+        if (!grid[rowIndex]) return;
+        grid[rowIndex][colIndex] = h;
+        if (!grid[rowIndex].every((v) => v > 0)) return;
+        const maxH = Math.max(...grid[rowIndex]);
+        rowLockedRef.current[rowIndex] = true;
+        setRowHeights(old => {
+            if (old[rowIndex] === maxH) return old;
+            const next = [...old];
+            next[rowIndex] = maxH;
+            return next;
+        });
+    }, []);
+
+    const isLastRow = (ri: number) => ri === rowCount - 1;
+    const { scrollViewProps, wheelProps } = useWebHorizontalScroll();
+
+    return (
+        <View
+            style={mdStyles.tableContainer(theme)}
+            onLayout={handleContainerLayout}
+            {...wheelProps}
+        >
+            <ScrollView
+                {...scrollViewProps}
+                horizontal
+                showsHorizontalScrollIndicator={Platform.OS !== 'web'}
+                nestedScrollEnabled
+                style={{ flexGrow: 0 }}
+            >
+                <View style={{ flexDirection: 'row' }}>
+                    {headers.map((headerText, colIndex) => (
+                        <View
+                            key={`col-${colIndex}`}
+                            style={colIndex < columnCount - 1 ? mdStyles.tableCellRightBorder(theme) : undefined}
+                        >
+                            {/* Header cell */}
+                            <View
+                                style={[
+                                    mdStyles.tableCell(theme),
+                                    mdStyles.tableHeaderCell(theme),
+                                    rowHeights[0] != null ? { height: rowHeights[0] } : undefined,
+                                ]}
+                                onLayout={(e) => handleCellLayout(0, colIndex, e.nativeEvent.layout.height)}
+                            >
+                                <Text style={[styles.msgText, { color: theme.colors.text, fontWeight: '700' }]}>
+                                    {renderInline(headerText, theme, `th-${colIndex}`)}
+                                </Text>
+                            </View>
+                            {/* Data cells */}
+                            {rows.map((row, rowIndex) => (
+                                <View
+                                    key={`cell-${rowIndex}-${colIndex}`}
+                                    style={[
+                                        mdStyles.tableCell(theme),
+                                        isLastRow(rowIndex) && { borderBottomWidth: 0 },
+                                        rowHeights[rowIndex + 1] != null ? { height: rowHeights[rowIndex + 1] } : undefined,
+                                    ]}
+                                    onLayout={(e) => handleCellLayout(rowIndex + 1, colIndex, e.nativeEvent.layout.height)}
+                                >
+                                    <Text style={[styles.msgText, { color: theme.colors.text }]}>
+                                        {renderInline(row[colIndex] || '', theme, `td-${rowIndex}-${colIndex}`)}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                    ))}
+                </View>
+            </ScrollView>
+        </View>
+    );
+}
+
 // Inline style helpers for MarkdownContent (can't use StyleSheet.create for dynamic theme)
 const mdStyles = {
     codeBlock: (theme: any) => ({
@@ -309,6 +443,30 @@ const mdStyles = {
         fontSize: 13,
         color: theme.colors.text,
         lineHeight: 18,
+    }),
+    tableContainer: (theme: any) => ({
+        marginVertical: 4,
+        borderWidth: 1,
+        borderColor: theme.colors.divider,
+        borderRadius: 8,
+        overflow: 'hidden' as const,
+        alignSelf: 'flex-start' as const,
+        maxWidth: '100%' as const,
+    }),
+    tableCell: (theme: any) => ({
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.divider,
+        alignItems: 'flex-start' as const,
+        justifyContent: 'center' as const,
+    }),
+    tableCellRightBorder: (theme: any) => ({
+        borderRightWidth: 1,
+        borderRightColor: theme.colors.divider,
+    }),
+    tableHeaderCell: (theme: any) => ({
+        backgroundColor: theme.colors.surfaceHigh,
     }),
 } as const;
 

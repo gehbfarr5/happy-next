@@ -12,7 +12,7 @@ function parseTableCell(cell: string) {
 }
 
 // Split a table row by '|', stripping leading/trailing pipes but preserving empty cells in between
-function splitTableRow(line: string): string[] {
+export function splitTableRow(line: string): string[] {
     // Remove leading/trailing pipe and whitespace
     let s = line;
     if (s.startsWith('|')) s = s.slice(1);
