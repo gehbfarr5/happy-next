@@ -87,6 +87,8 @@ export const MarkdownView = React.memo((props: {
         } else if (block.type === 'options') {
             if (props.hideOptions) return null;
             return <RenderOptionsBlock items={block.items} key={index} first={index === 0} last={index === blocks.length - 1} selectable={selectable} onOptionPress={props.onOptionPress} onOptionLongPress={props.onOptionLongPress} optionsLoadingState={props.optionsLoadingState} />;
+        } else if (block.type === 'blockquote') {
+            return <RenderBlockquoteBlock content={block.content} key={index} first={index === 0} last={index === blocks.length - 1} selectable={selectable} />;
         } else if (block.type === 'table') {
             return <RenderTableBlock headers={block.headers} rows={block.rows} key={index} first={index === 0} last={index === blocks.length - 1} />;
         } else {
@@ -362,6 +364,18 @@ function RenderOptionsBlock(props: {
                     }
                 })}
             </View>
+        </View>
+    );
+}
+
+function RenderBlockquoteBlock(props: { content: MarkdownSpan[][], first: boolean, last: boolean, selectable: boolean }) {
+    return (
+        <View style={[style.blockquote, props.first && style.first, props.last && style.last]}>
+            {props.content.map((spans, index) => (
+                <Text selectable={props.selectable} style={style.blockquoteText} key={index}>
+                    <RenderSpans spans={spans} baseStyle={style.blockquoteText} />
+                </Text>
+            ))}
         </View>
     );
 }
@@ -679,6 +693,19 @@ const style = StyleSheet.create((theme) => ({
         color: theme.colors.text,
         fontSize: 14,
         lineHeight: 20,
+    },
+    blockquote: {
+        borderLeftWidth: 3,
+        borderLeftColor: theme.colors.textSecondary,
+        paddingLeft: 12,
+        marginVertical: 8,
+        gap: 8,
+    },
+    blockquoteText: {
+        ...Typography.default(),
+        fontSize: 16,
+        lineHeight: 24,
+        color: theme.colors.textSecondary,
     },
     horizontalRule: {
         height: 1,

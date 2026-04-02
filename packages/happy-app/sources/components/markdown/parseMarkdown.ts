@@ -34,6 +34,9 @@ export type MarkdownBlock = {
     type: 'table',
     headers: MarkdownSpan[][],
     rows: MarkdownSpan[][][]
+} | {
+    type: 'blockquote',
+    content: MarkdownSpan[][]
 }
 
 export type MarkdownSpan = {

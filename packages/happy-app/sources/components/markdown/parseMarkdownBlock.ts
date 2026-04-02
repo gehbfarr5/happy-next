@@ -1,4 +1,4 @@
-import type { MarkdownBlock, OptionItem } from "./parseMarkdown";
+import type { MarkdownBlock, MarkdownSpan, OptionItem } from "./parseMarkdown";
 import { parseMarkdownSpans } from "./parseMarkdownSpans";
 
 const EMPTY_TABLE_CELL_PLACEHOLDER = '\u200B';
@@ -199,6 +199,39 @@ export function parseMarkdownBlock(markdown: string) {
             }
             if (items.length > 0) {
                 blocks.push({ type: 'options', items });
+            }
+            continue;
+        }
+
+        // Blockquote
+        if (trimmed.startsWith('> ') || trimmed === '>') {
+            let allLines = [trimmed === '>' ? '' : trimmed.slice(2)];
+            while (index < lines.length) {
+                const nextTrimmed = lines[index].trim();
+                if (nextTrimmed.startsWith('> ') || nextTrimmed === '>') {
+                    allLines.push(nextTrimmed === '>' ? '' : nextTrimmed.slice(2));
+                    index++;
+                } else {
+                    break;
+                }
+            }
+            const paragraphs: MarkdownSpan[][] = [];
+            let currentParagraph: string[] = [];
+            for (const l of allLines) {
+                if (l === '') {
+                    if (currentParagraph.length > 0) {
+                        paragraphs.push(parseMarkdownSpans(currentParagraph.join(' '), false));
+                        currentParagraph = [];
+                    }
+                } else {
+                    currentParagraph.push(l);
+                }
+            }
+            if (currentParagraph.length > 0) {
+                paragraphs.push(parseMarkdownSpans(currentParagraph.join(' '), false));
+            }
+            if (paragraphs.length > 0) {
+                blocks.push({ type: 'blockquote', content: paragraphs });
             }
             continue;
         }
