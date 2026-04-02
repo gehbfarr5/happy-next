@@ -38,6 +38,11 @@ export async function friendAdd(ctx: Context, uid: string): Promise<UserProfile 
             return null;
         }
 
+        // Both users must have a username to add friends
+        if (!currentUser.username || !targetUser.username) {
+            return null;
+        }
+
         // Read relationship status
         const currentUserRelationship = await relationshipGet(tx, currentUser.id, targetUser.id);
         const targetUserRelationship = await relationshipGet(tx, targetUser.id, currentUser.id);
