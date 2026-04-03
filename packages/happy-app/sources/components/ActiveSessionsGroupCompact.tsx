@@ -275,7 +275,11 @@ export function ActiveSessionsGroupCompact({ sessions, selectedSessionId }: Acti
                                         <Avatar id={avatarId} size={24} flavor={firstSession?.metadata?.flavor} sessionIcon={firstSession?.metadata?.sessionIcon} />
                                     </View>
                                 )}
-                                <Text style={styles.sectionHeaderPath}>
+                                <Text
+                                    style={styles.sectionHeaderPath}
+                                    numberOfLines={1}
+                                    ref={(el: any) => { if (el) el.title = projectGroup.displayPath; }}
+                                >
                                     {projectGroup.displayPath}
                                 </Text>
                             </View>

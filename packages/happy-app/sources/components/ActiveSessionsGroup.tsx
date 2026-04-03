@@ -63,6 +63,7 @@ const stylesheet = StyleSheet.create((theme, runtime) => ({
         lineHeight: Platform.select({ ios: 18, default: 20 }),
         letterSpacing: Platform.select({ ios: -0.08, default: 0.1 }),
         fontWeight: Platform.select({ ios: 'normal', default: '500' }),
+        flexShrink: 1,
     },
     sectionHeaderMachine: {
         ...Typography.default('regular'),
@@ -311,7 +312,11 @@ export function ActiveSessionsGroup({ sessions, selectedSessionId }: ActiveSessi
                         {/* Section header on grouped background */}
                         <View style={styles.sectionHeader}>
                             <View style={styles.sectionHeaderLeft}>
-                                <Text style={styles.sectionHeaderPath}>
+                                <Text
+                                    style={styles.sectionHeaderPath}
+                                    numberOfLines={1}
+                                    ref={(el: any) => { if (el) el.title = projectGroup.displayPath; }}
+                                >
                                     {projectGroup.displayPath}
                                 </Text>
                             </View>
