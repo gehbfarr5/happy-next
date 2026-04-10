@@ -5,9 +5,7 @@ import {
   keymap,
   lineNumbers,
   drawSelection,
-  highlightActiveLine,
   highlightActiveLineGutter,
-  type DecorationSet,
 } from '@codemirror/view';
 import {
   syntaxHighlighting,
@@ -36,7 +34,6 @@ import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
     keymap,
     lineNumbers,
     drawSelection,
-    highlightActiveLine,
     highlightActiveLineGutter,
   },
   language: { syntaxHighlighting, defaultHighlightStyle, StreamLanguage, oneDarkHighlightStyle },

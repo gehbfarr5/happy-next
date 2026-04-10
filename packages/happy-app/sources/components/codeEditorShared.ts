@@ -1,4 +1,6 @@
 import codemirrorBundleSource from './codemirror-bundle-string';
+import { encodeBase64 } from '@/encryption/base64';
+import { encodeUTF8 } from '@/encryption/text';
 
 export type EditorCommand =
     | { type: 'setValue'; value: string }
@@ -16,12 +18,7 @@ export type EditorEvent =
     | { type: 'error'; message: string };
 
 export function encodeBase64Utf8(value: string): string {
-    const bytes = new TextEncoder().encode(value);
-    let binary = '';
-    for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
+    return encodeBase64(encodeUTF8(value));
 }
 
 export function buildEditorHtml(args: {
@@ -41,6 +38,7 @@ export function buildEditorHtml(args: {
     const safeLanguage = JSON.stringify(initialLanguage);
     const safeTheme = JSON.stringify(initialTheme);
     const safeBottomPadding = Number.isFinite(initialBottomPadding) ? initialBottomPadding : 16;
+    const monoFont = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
 
     return `<!DOCTYPE html>
 <html>
@@ -67,7 +65,7 @@ export function buildEditorHtml(args: {
         border: 0;
         outline: none;
         resize: none;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-family: ${monoFont};
         font-size: 14px;
         line-height: 20px;
         padding: 12px 12px ${safeBottomPadding}px;
@@ -79,7 +77,7 @@ export function buildEditorHtml(args: {
       }
       .cm-editor .cm-scroller {
         overflow: auto;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-family: ${monoFont};
         font-size: 14px;
         line-height: 20px;
       }
@@ -110,13 +108,11 @@ export function buildEditorHtml(args: {
         var root = document.getElementById('root');
         var suppressChanges = false;
 
-        // Compartments for dynamic reconfiguration
         var languageCompartment = null;
         var themeCompartment = null;
         var readOnlyCompartment = null;
         var bottomPaddingCompartment = null;
 
-        // Target line highlight state
         var targetLineEffect = null;
         var clearTargetLineEffect = null;
 
@@ -260,7 +256,6 @@ export function buildEditorHtml(args: {
             readOnlyCompartment = new CM.state.Compartment();
             bottomPaddingCompartment = new CM.state.Compartment();
 
-            // Target line highlight via StateEffect + StateField + Decoration
             targetLineEffect = CM.state.StateEffect.define();
             clearTargetLineEffect = CM.state.StateEffect.define();
 
@@ -350,7 +345,6 @@ export function buildEditorHtml(args: {
             return;
           }
 
-          // Fallback textarea positioning
           var text = fallback.value || '';
           var lines = text.split('\\n');
           targetLine = clampNumber(targetLine, 1, Math.max(1, lines.length));
