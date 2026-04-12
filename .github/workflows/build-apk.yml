@@ -1,0 +1,82 @@
+name: Build APK (local notification)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build variant'
+        required: false
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/happy-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: .
+
+      - name: Expo prebuild (Android)
+        run: npx expo prebuild --platform android --clean
+        env:
+          APP_ENV: preview
+
+      - name: Disable lint for CI
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/disable-lint.gradle << 'GRADLE'
+          allprojects {
+              afterEvaluate {
+                  tasks.matching { it.name.startsWith("lintVital") }.configureEach {
+                      enabled = false
+                  }
+              }
+          }
+          GRADLE
+
+      - name: Build APK (${{ inputs.build_type }})
+        run: |
+          cd android
+          if [ "${{ inputs.build_type }}" = "release" ]; then
+            ./gradlew assembleRelease -PabiFilters=arm64-v8a --no-daemon
+          else
+            ./gradlew assembleDebug -PabiFilters=arm64-v8a --no-daemon
+          fi
+
+      - name: Locate APK
+        id: find_apk
+        run: |
+          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
+          echo "apk_path=$APK" >> $GITHUB_OUTPUT
+          echo "Found APK: $APK"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: happy-next-${{ inputs.build_type }}-${{ github.sha }}
+          path: packages/happy-app/${{ steps.find_apk.outputs.apk_path }}
+          retention-days: 7

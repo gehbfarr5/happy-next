@@ -3674,6 +3674,10 @@ class Sync {
         }
         if (result.hasReadyEvent) {
             voiceHooks.onReady(sessionId);
+            // Send a local (on-device) notification so the user is alerted even when the app is backgrounded.
+            import('@/utils/localNotification').then(({ sendLocalReadyNotification }) => {
+                sendLocalReadyNotification();
+            }).catch(() => {});
         }
     }
 
