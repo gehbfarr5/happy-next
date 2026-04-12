@@ -32,7 +32,7 @@ import { monkeyPatchConsoleForRemoteLoggingForFasterAiAutoDebuggingOnlyInLocalBu
 import { useUnistyles } from 'react-native-unistyles';
 import { AsyncLock } from '@/utils/lock';
 import { storage } from '@/sync/storage';
-import { usePathname } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { useDootaskGlobalWebSocket } from '@/hooks/useDootaskGlobalWebSocket';
 
 let currentAppState: string = AppState.currentState;
@@ -215,6 +215,7 @@ async function loadFonts() {
 }
 
 export default function RootLayout() {
+    const router = useRouter();
     const pathname = usePathname();
     React.useEffect(() => {
         const subscription = AppState.addEventListener('change', (nextState) => {
@@ -239,6 +240,29 @@ export default function RootLayout() {
         }
         currentSessionId = newSessionId;
     }, [pathname]);
+    // Handle notification tap: navigate to the relevant session.
+    // Covers both foreground taps and cold-start (app launched via notification).
+    React.useEffect(() => {
+        if (!initState) return;
+
+        function handleNotificationResponse(response: Notifications.NotificationResponse | null) {
+            if (!response) return;
+            const data = response.notification.request.content.data as Record<string, unknown>;
+            const sessionId = typeof data?.sessionId === 'string' ? data.sessionId : null;
+            if (!sessionId) return;
+            router.push(`/session/${encodeURIComponent(sessionId)}`);
+        }
+
+        // Foreground / background tap
+        const subscription = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
+
+        // Cold-start: app was launched by tapping the notification
+        Notifications.getLastNotificationResponseAsync()
+            .then(handleNotificationResponse)
+            .catch(() => {});
+
+        return () => subscription.remove();
+    }, [initState, router]);
     const { theme } = useUnistyles();
     const navigationTheme = React.useMemo(() => {
         if (theme.dark) {
