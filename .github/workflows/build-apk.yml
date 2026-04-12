@@ -2,15 +2,6 @@ name: Build APK (local notification)
 
 on:
   workflow_dispatch:
-    inputs:
-      build_type:
-        description: 'Build variant'
-        required: false
-        default: 'debug'
-        type: choice
-        options:
-          - debug
-          - release
 
 jobs:
   build-apk:
@@ -45,6 +36,17 @@ jobs:
         env:
           APP_ENV: preview
 
+      - name: Generate signing keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore signing.keystore \
+            -alias happynext \
+            -keyalg RSA -keysize 2048 \
+            -validity 10000 \
+            -storepass happynext123 \
+            -keypass happynext123 \
+            -dname "CN=Happy Next,O=Happy Next,C=CN"
+
       - name: Disable lint for CI
         run: |
           mkdir -p ~/.gradle/init.d
@@ -58,25 +60,27 @@ jobs:
           }
           GRADLE
 
-      - name: Build APK (${{ inputs.build_type }})
+      - name: Build Release APK (standalone, no dev server)
         run: |
           cd android
-          if [ "${{ inputs.build_type }}" = "release" ]; then
-            ./gradlew assembleRelease -PabiFilters=arm64-v8a --no-daemon
-          else
-            ./gradlew assembleDebug -PabiFilters=arm64-v8a --no-daemon
-          fi
+          ./gradlew assembleRelease \
+            -PabiFilters=arm64-v8a \
+            -Pandroid.injected.signing.store.file=$(pwd)/../signing.keystore \
+            -Pandroid.injected.signing.store.password=happynext123 \
+            -Pandroid.injected.signing.key.alias=happynext \
+            -Pandroid.injected.signing.key.password=happynext123 \
+            --no-daemon
 
       - name: Locate APK
         id: find_apk
         run: |
-          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
           echo "apk_path=$APK" >> $GITHUB_OUTPUT
           echo "Found APK: $APK"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: happy-next-${{ inputs.build_type }}-${{ github.sha }}
+          name: happy-next-release-${{ github.sha }}
           path: packages/happy-app/${{ steps.find_apk.outputs.apk_path }}
           retention-days: 7
