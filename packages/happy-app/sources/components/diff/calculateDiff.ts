@@ -171,51 +171,20 @@ function findBestMatch(target: string, candidates: string[]): number {
     return bestIndex;
 }
 
-/**
- * Calculate similarity between two strings (0-1)
- */
 function calculateSimilarity(str1: string, str2: string): number {
     if (str1 === str2) return 1;
     if (!str1 || !str2) return 0;
-    
-    // Simple character-based similarity
-    const chars1 = str1.split('');
-    const chars2 = str2.split('');
-    const maxLen = Math.max(chars1.length, chars2.length);
-    
-    if (maxLen === 0) return 1;
-    
-    let matches = 0;
-    const minLen = Math.min(chars1.length, chars2.length);
-    
-    for (let i = 0; i < minLen; i++) {
-        if (chars1[i] === chars2[i]) matches++;
-    }
-    
-    // Also check for common substrings
-    const commonSubstrings = findCommonSubstrings(str1, str2);
-    const substringBonus = commonSubstrings.reduce((sum, sub) => sum + sub.length, 0) / maxLen;
-    
-    return (matches / maxLen + substringBonus) / 2;
-}
 
-/**
- * Find common substrings between two strings
- */
-function findCommonSubstrings(str1: string, str2: string): string[] {
-    const minLength = 3; // Minimum substring length
-    const substrings: string[] = [];
-    
-    for (let len = Math.min(str1.length, str2.length); len >= minLength; len--) {
-        for (let i = 0; i <= str1.length - len; i++) {
-            const sub = str1.substring(i, i + len);
-            if (str2.includes(sub) && !substrings.some(s => s.includes(sub))) {
-                substrings.push(sub);
-            }
-        }
+    const maxLen = Math.max(str1.length, str2.length);
+    if (maxLen === 0) return 1;
+
+    let matches = 0;
+    const minLen = Math.min(str1.length, str2.length);
+    for (let i = 0; i < minLen; i++) {
+        if (str1[i] === str2[i]) matches++;
     }
-    
-    return substrings;
+
+    return matches / maxLen;
 }
 
 /**

@@ -4,10 +4,9 @@ import { useUnistyles } from 'react-native-unistyles';
 import {
     buildEditorHtml,
     encodeBase64Utf8,
-    resolveMonacoBaseCandidates,
     type EditorCommand,
     type EditorEvent,
-} from '@/components/codeEditorMonacoShared';
+} from '@/components/codeEditorShared';
 
 interface CodeEditorProps {
     value: string;
@@ -39,16 +38,17 @@ export const CodeEditor = React.forwardRef<CodeEditorHandle, CodeEditorProps>(({
     const lastValueFromEditorRef = React.useRef(value);
     const pendingCommandsRef = React.useRef<EditorCommand[]>([]);
     const initialValueRef = React.useRef(value);
+    const valueRef = React.useRef(value);
+    valueRef.current = value;
+    const onChangeTextRef = React.useRef(onChangeText);
+    onChangeTextRef.current = onChangeText;
     const themeMode = rt.themeName === 'dark' ? 'dark' : 'light';
-    const monacoBaseCandidates = React.useMemo(() => resolveMonacoBaseCandidates(), []);
-
     const html = React.useMemo(() => buildEditorHtml({
         initialValueBase64: encodeBase64Utf8(initialValueRef.current),
         initialLanguage: language,
         initialTheme: themeMode,
         initialBottomPadding: bottomPadding,
         initialReadOnly: readOnly,
-        monacoBaseCandidates,
     }), []);
 
     const postCommand = React.useCallback((command: EditorCommand) => {
@@ -82,15 +82,15 @@ export const CodeEditor = React.forwardRef<CodeEditorHandle, CodeEditorProps>(({
                     readyRef.current = true;
                     lastValueFromEditorRef.current = payload.value;
                     flushPendingCommands();
-                    if (value !== payload.value) {
-                        postCommand({ type: 'setValue', value });
+                    if (valueRef.current !== payload.value) {
+                        postCommand({ type: 'setValue', value: valueRef.current });
                     }
                     return;
                 }
 
                 if (payload.type === 'change') {
                     lastValueFromEditorRef.current = payload.value;
-                    onChangeText(payload.value);
+                    onChangeTextRef.current(payload.value);
                     return;
                 }
 
@@ -106,7 +106,7 @@ export const CodeEditor = React.forwardRef<CodeEditorHandle, CodeEditorProps>(({
         return () => {
             window.removeEventListener('message', handleWindowMessage);
         };
-    }, [flushPendingCommands, onChangeText, postCommand, value]);
+    }, [flushPendingCommands, postCommand]);
 
     React.useEffect(() => {
         if (value === lastValueFromEditorRef.current) return;
