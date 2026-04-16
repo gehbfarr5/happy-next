@@ -245,7 +245,7 @@ export default function RootLayout() {
       const data = response.notification.request.content.data as Record<string, unknown>;
       const sessionId = typeof data?.sessionId === 'string' ? data.sessionId : null;
       if (!sessionId) return;
-      router.push(\`/session/\${encodeURIComponent(sessionId)}\`);
+      router.push(`/session/${encodeURIComponent(sessionId)}`);
     }
 
     // Foreground / background tap
