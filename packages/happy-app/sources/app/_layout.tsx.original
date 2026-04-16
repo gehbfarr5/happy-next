@@ -1,5 +1,4 @@
 import 'react-native-quick-base64';
-import { registerBackgroundFetch, checkPendingSessionsOnForeground } from '@/utils/backgroundTask';
 import '@/encryption/ed25519.setup';
 import '../theme.css';
 import * as React from 'react';
@@ -228,17 +227,11 @@ export default function RootLayout() {
                     resetBadgeCount(credentials);
                 }
             }
-      // Check for pending sessions when app comes to foreground
-      if (nextState === 'active') {
-        checkPendingSessionsOnForeground().catch(() => {});
-      }
         });
         return () => {
             subscription.remove();
         };
     }, []);
-  // Register background fetch task
-  registerBackgroundFetch().catch(() => {});
     React.useEffect(() => {
         const newSessionId = getSessionIdFromPath(pathname);
         if (currentSessionId && !newSessionId) {
