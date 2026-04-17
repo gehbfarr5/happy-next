@@ -21,7 +21,6 @@ import { ModalProvider } from '@/modal';
 import { PostHogProvider } from 'posthog-react-native';
 import { tracking } from '@/track/tracking';
 import { sync, syncRestore } from '@/sync/sync';
-import { resetBadgeCount } from '@/sync/apiPush';
 import { useTrackScreens } from '@/track/useTrackScreens';
 import { RealtimeProvider } from '@/realtime/RealtimeProvider';
 import { FaviconPermissionIndicator } from '@/components/web/FaviconPermissionIndicator';
@@ -33,7 +32,7 @@ import { monkeyPatchConsoleForRemoteLoggingForFasterAiAutoDebuggingOnlyInLocalBu
 import { useUnistyles } from 'react-native-unistyles';
 import { AsyncLock } from '@/utils/lock';
 import { storage } from '@/sync/storage';
-import { usePathname } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { useDootaskGlobalWebSocket } from '@/hooks/useDootaskGlobalWebSocket';
 
 let currentAppState: string = AppState.currentState;
@@ -216,22 +215,16 @@ async function loadFonts() {
 }
 
 export default function RootLayout() {
+    const router = useRouter();
     const pathname = usePathname();
     React.useEffect(() => {
         const subscription = AppState.addEventListener('change', (nextState) => {
             currentAppState = nextState;
-            // Clear badge when app comes to foreground or goes to background
-            if (nextState === 'active' || nextState === 'background') {
+            if (nextState === 'active') {
+                // Clear local badge count and check for completed sessions on foreground
                 Notifications.setBadgeCountAsync(0);
-                const credentials = sync.getCredentials();
-                if (credentials) {
-                    resetBadgeCount(credentials);
-                }
+                checkCompletedSessions().catch(() => {});
             }
-      // 前台恢复时检查已完成的会话
-      if (nextState === 'active') {
-        checkCompletedSessions().catch(() => {});
-      }
         });
         return () => {
             subscription.remove();
@@ -240,11 +233,12 @@ export default function RootLayout() {
     React.useEffect(() => {
         const newSessionId = getSessionIdFromPath(pathname);
         if (currentSessionId && !newSessionId) {
-    // 进入会话时清除通知状态
-    if (newSessionId) {
-      onEnterSession(newSessionId);
-    }
             sync.onSessionHidden();
+        }
+        if (newSessionId) {
+            // User opened a session — clear "already notified" flag so the next
+            // completion fires a fresh notification.
+            onEnterSession(newSessionId);
         }
         currentSessionId = newSessionId;
     }, [pathname]);
@@ -296,6 +290,49 @@ export default function RootLayout() {
                 SplashScreen.hideAsync();
             }, 100);
         }
+    }, [initState]);
+
+    // Handle notification taps — navigate to the relevant session.
+    // Covers foreground taps, background taps, and cold-start (app launched via notification).
+    const coldStartHandled = React.useRef(false);
+    React.useEffect(() => {
+        if (!initState) return;
+
+        const handleNotificationResponse = (response: Notifications.NotificationResponse | null) => {
+            if (!response) return;
+            const data = response.notification.request.content.data as Record<string, unknown>;
+            const sessionId = typeof data?.sessionId === 'string' ? data.sessionId : null;
+            if (!sessionId) return;
+            router.push(`/session/${encodeURIComponent(sessionId)}`);
+        };
+
+        const subscription = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
+
+        // Cold-start: app was launched by tapping a notification.
+        // Use a one-shot ref so re-renders don't re-navigate.
+        if (!coldStartHandled.current) {
+            coldStartHandled.current = true;
+            Notifications.getLastNotificationResponseAsync()
+                .then(response => {
+                    if (!response) return;
+                    // Only process notifications from the last 5 minutes to avoid
+                    // navigating on a stale response from a previous app session.
+                    const ageSeconds = Date.now() / 1000 - response.notification.date;
+                    if (ageSeconds > 300) return;
+                    handleNotificationResponse(response);
+                })
+                .catch(() => {});
+        }
+
+        return () => subscription.remove();
+    }, [initState, router]);
+
+    // Register the background session polling task once the app is initialised.
+    React.useEffect(() => {
+        if (!initState) return;
+        import('@/utils/backgroundSessionMonitor')
+            .then(({ registerBackgroundSessionMonitor }) => registerBackgroundSessionMonitor())
+            .catch(() => {});
     }, [initState]);
 
 

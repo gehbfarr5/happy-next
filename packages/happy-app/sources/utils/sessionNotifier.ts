@@ -1,116 +1,125 @@
 /**
  * 会话完成通知模块
- * 
+ *
  * 核心逻辑：
- * 1. 前台恢复时轮询 API 检查已完成会话
- * 2. 用户进入会话页面时清除该会话的通知状态
- * 3. 原始 WebSocket 通知保持不变（前台时生效）
+ * 1. 通过轮询 API 的 session.active 字段（无需解密）检测会话是否完成
+ * 2. 用 MMKV 快照追踪上次已知的 active 状态，避免重复通知
+ * 3. 前台 WebSocket ready event 和后台轮询两条路径均通过 markNotified 去重
  */
 
 import { MMKV } from 'react-native-mmkv';
-import * as SecureStore from 'expo-secure-store';
+import { TokenStorage } from '@/auth/tokenStorage';
 import { getServerUrl } from '@/sync/serverConfig';
 import { sendLocalReadyNotification } from '@/utils/localNotification';
+import { loadSnapshot, saveSnapshot } from '@/sync/sessionSnapshot';
 
 const NOTIFIED_KEY = 'notified_sessions_v3';
-const LAST_VIEWED_KEY = 'session-last-viewed-at';
 
 const mmkv = new MMKV();
 
-// 获取已通知的会话
+// ─── Notified-set helpers ─────────────────────────────────────────────────────
+
 function getNotified(): Set<string> {
-  try {
-    const raw = mmkv.getString(NOTIFIED_KEY);
-    return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch { return new Set(); }
+    try {
+        const raw = mmkv.getString(NOTIFIED_KEY);
+        return raw ? new Set(JSON.parse(raw)) : new Set();
+    } catch {
+        return new Set();
+    }
 }
 
 function saveNotified(s: Set<string>) {
-  mmkv.set(NOTIFIED_KEY, JSON.stringify([...s]));
+    try {
+        mmkv.set(NOTIFIED_KEY, JSON.stringify([...s]));
+    } catch { /* best-effort */ }
 }
 
-// 获取 lastViewedAt 映射
-function getLastViewed(): Record<string, number> {
-  try {
-    const raw = mmkv.getString(LAST_VIEWED_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch { return {}; }
+// ─── Raw session shape from /v1/sessions ─────────────────────────────────────
+// We only read `id` and `active` — all other fields (metadata, agentState) are
+// encrypted strings and must NOT be accessed here.
+interface RawSession {
+    id: string;
+    active: boolean;
 }
 
-// 获取 credentials
-async function getCredentials(): Promise<string | null> {
-  try {
-    return await SecureStore.getItemAsync('auth_token');
-  } catch { return null; }
-}
+// ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
- * 检查已完成的会话并发送通知
- * 返回是否有新通知
+ * Poll /v1/sessions and fire a local notification for any session that
+ * transitioned from active → inactive since the last snapshot.
+ *
+ * Safe to call from both foreground (AppState → active) and background
+ * (BackgroundFetch task).
+ *
+ * Returns true if at least one notification was fired.
  */
 export async function checkCompletedSessions(): Promise<boolean> {
-  console.log('[Notifier] Checking...');
-  
-  const token = await getCredentials();
-  if (!token) return false;
+    const credentials = await TokenStorage.getCredentials();
+    if (!credentials) return false;
 
-  try {
-    const res = await fetch(`${getServerUrl()}/v1/sessions`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!res.ok) return false;
+    try {
+        const res = await fetch(`${getServerUrl()}/v1/sessions`, {
+            headers: { Authorization: `Bearer ${credentials.token}` },
+        });
+        if (!res.ok) return false;
 
-    const { sessions = [] } = await res.json();
-    const notified = getNotified();
-    const lastViewed = getLastViewed();
-    let hasNew = false;
+        const { sessions = [] }: { sessions: RawSession[] } = await res.json();
+        const snapshot = loadSnapshot();
+        const notified = getNotified();
+        let hasNew = false;
 
-    for (const s of sessions) {
-      const done = s.agentState?.taskCompleted;
-      if (!done) continue;
+        for (const s of sessions) {
+            const prev = snapshot.sessions[s.id];
+            const wasActive = prev?.active ?? false;
+            const completedNow = wasActive && !s.active;
+            const alreadyNotified = notified.has(s.id);
 
-      // 已通知过，跳过
-      if (notified.has(s.id)) continue;
+            if (completedNow && !alreadyNotified) {
+                // Use the title stored in the snapshot (set from foreground where
+                // decryption runs). Falls back to undefined if not yet cached.
+                const title = prev?.title;
+                await sendLocalReadyNotification(s.id, title);
+                notified.add(s.id);
+                hasNew = true;
+            }
 
-      // 用户已查看（lastViewedAt >= taskCompleted），跳过
-      const viewed = lastViewed[s.id] || 0;
-      if (viewed >= done) continue;
+            // Update snapshot active state; preserve title from previous snapshot entry.
+            snapshot.sessions[s.id] = {
+                active: s.active,
+                title: prev?.title ?? '',
+            };
+        }
 
-      console.log('[Notifier] Notify:', s.id, 'taskCompleted:', done, 'lastViewed:', viewed);
-      await sendLocalReadyNotification(s.id, s.title);
-      notified.add(s.id);
-      hasNew = true;
+        if (hasNew) saveNotified(notified);
+        saveSnapshot(snapshot);
+        return hasNew;
+    } catch (e) {
+        console.warn('[sessionNotifier] checkCompletedSessions error:', e);
+        return false;
     }
-
-    if (hasNew) saveNotified(notified);
-    return hasNew;
-  } catch (e) {
-    console.warn('[Notifier] Error:', e);
-    return false;
-  }
 }
 
 /**
- * 用户进入会话时调用，清除该会话的通知状态
- * 这样如果会话再次完成，可以重新通知
+ * Call when the user opens a session page.
+ * Clears the "already notified" flag so the next completion fires a fresh notification.
  */
-export function onEnterSession(sessionId: string) {
-  const notified = getNotified();
-  if (notified.has(sessionId)) {
-    notified.delete(sessionId);
-    saveNotified(notified);
-    console.log('[Notifier] Cleared on enter:', sessionId);
-  }
+export function onEnterSession(sessionId: string): void {
+    const notified = getNotified();
+    if (notified.has(sessionId)) {
+        notified.delete(sessionId);
+        saveNotified(notified);
+    }
 }
 
 /**
- * 标记会话为已通知（从 WebSocket hasReadyEvent 调用）
+ * Mark a session as notified.
+ * Called from the foreground WebSocket ready-event path in sync.ts so the
+ * background task doesn't double-fire for the same completion.
  */
-export function markNotified(sessionId: string) {
-  const notified = getNotified();
-  if (!notified.has(sessionId)) {
-    notified.add(sessionId);
-    saveNotified(notified);
-    console.log('[Notifier] Marked:', sessionId);
-  }
+export function markNotified(sessionId: string): void {
+    const notified = getNotified();
+    if (!notified.has(sessionId)) {
+        notified.add(sessionId);
+        saveNotified(notified);
+    }
 }

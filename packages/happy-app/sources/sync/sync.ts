@@ -19,7 +19,8 @@ import { InvalidateSync } from '@/utils/sync';
 import { ActivityUpdateAccumulator } from './reducer/activityUpdateAccumulator';
 import { randomUUID, getRandomBytes } from 'expo-crypto';
 import * as Notifications from 'expo-notifications';
-import { registerPushToken } from './apiPush';
+import { snapshotActiveSessions } from './sessionSnapshot';
+import { markNotified } from '@/utils/sessionNotifier';
 import { Platform, AppState } from 'react-native';
 import { isRunningOnMac } from '@/utils/platform';
 import { NormalizedMessage, normalizeRawMessage, RawRecord, RawRecordSchema, ImageContent } from './typesRaw';
@@ -180,7 +181,6 @@ class Sync {
     private sessionModeConfigSync: InvalidateSync;
     private profileSync: InvalidateSync;
     private machinesSync: InvalidateSync;
-    private pushTokenSync: InvalidateSync;
     private nativeUpdateSync: InvalidateSync;
     private artifactsSync: InvalidateSync;
     private friendsSync: InvalidateSync;
@@ -215,16 +215,15 @@ class Sync {
         this.sharedSessionsSync = new InvalidateSync(this.fetchSharedSessions);
         this.openClawMachinesSync = new InvalidateSync(this.fetchOpenClawMachines);
 
-        const registerPushToken = async () => {
-            // Keep push token registration enabled in dev builds too:
-            // Android contributors often validate notifications on dev clients.
-            await this.registerPushToken();
-        }
-        this.pushTokenSync = new InvalidateSync(registerPushToken);
         this.activityAccumulator = new ActivityUpdateAccumulator(this.flushActivityUpdates.bind(this), 2000);
 
-        // Refresh data when app becomes active
+        // Refresh data when app becomes active / snapshot when backgrounded
         AppState.addEventListener('change', (nextAppState) => {
+            if (nextAppState === 'background') {
+                // Save active-session snapshot so the background polling task can
+                // detect state changes without needing decryption.
+                snapshotActiveSessions();
+            }
             if (nextAppState === 'active') {
                 log.log('📱 App became active');
                 // Refresh lastViewedAt so blue dot won't flash for the session user is viewing
@@ -234,7 +233,6 @@ class Sync {
                 this.profileSync.invalidate();
                 this.machinesSync.invalidate();
                 this.openClawMachinesSync.invalidate();
-                this.pushTokenSync.invalidate();
                 this.sessionsSync.invalidate();
                 this.nativeUpdateSync.invalidate();
                 log.log('📱 App became active: Invalidating artifacts sync');
@@ -367,7 +365,6 @@ class Sync {
         this.profileSync.invalidate();
         this.machinesSync.invalidate();
         this.openClawMachinesSync.invalidate();
-        this.pushTokenSync.invalidate();
         this.nativeUpdateSync.invalidate();
         this.friendsSync.invalidate();
         this.friendRequestsSync.invalidate();
@@ -2512,43 +2509,6 @@ class Sync {
         }
     }
 
-    private registerPushToken = async () => {
-        log.log('registerPushToken');
-        // Only register on mobile platforms
-        if (Platform.OS === 'web') {
-            return;
-        }
-
-        // Request permission
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        log.log('existingStatus: ' + JSON.stringify(existingStatus));
-
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-        }
-        log.log('finalStatus: ' + JSON.stringify(finalStatus));
-
-        if (finalStatus !== 'granted') {
-            console.log('Failed to get push token for push notification!');
-            return;
-        }
-
-        // Get push token
-        const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-
-        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
-        log.log('tokenData: ' + JSON.stringify(tokenData));
-
-        // Register with server
-        try {
-            await registerPushToken(this.credentials, tokenData.data);
-            log.log('Push token registered successfully');
-        } catch (error) {
-            log.log('Failed to register push token: ' + JSON.stringify(error));
-        }
-    }
 
     private subscribeToUpdates = () => {
         // Subscribe to message updates
@@ -3674,10 +3634,16 @@ class Sync {
         }
         if (result.hasReadyEvent) {
             voiceHooks.onReady(sessionId);
-            // Send a local (on-device) notification so the user is alerted even when the app is backgrounded.
+            // Send a local (on-device) notification. The background polling task also
+            // fires this; markSessionNotified prevents both paths from double-firing.
+            const session = storage.getState().sessions[sessionId];
             import('@/utils/localNotification').then(({ sendLocalReadyNotification }) => {
-                const session = getSession(sessionId);
-                sendLocalReadyNotification(sessionId, session?.title ?? undefined);
+                // Inline title extraction to avoid circular dep with sessionUtils
+                const title = session?.metadata
+                    ? (session.metadata.summary?.text ?? session.metadata.path.split('/').filter(Boolean).pop())
+                    : undefined;
+                sendLocalReadyNotification(sessionId, title);
+                markNotified(sessionId);
             }).catch(() => {});
         }
     }
