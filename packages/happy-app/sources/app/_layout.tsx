@@ -1,5 +1,5 @@
 import 'react-native-quick-base64';
-import { registerBackgroundFetch, checkPendingSessionsOnForeground } from '@/utils/backgroundTask';
+import { checkCompletedSessions, onEnterSession } from '@/utils/sessionNotifier';
 import '@/encryption/ed25519.setup';
 import '../theme.css';
 import * as React from 'react';
@@ -228,20 +228,22 @@ export default function RootLayout() {
                     resetBadgeCount(credentials);
                 }
             }
-      // Check for pending sessions when app comes to foreground
+      // 前台恢复时检查已完成的会话
       if (nextState === 'active') {
-        checkPendingSessionsOnForeground().catch(() => {});
+        checkCompletedSessions().catch(() => {});
       }
         });
         return () => {
             subscription.remove();
         };
     }, []);
-  // Register background fetch task
-  registerBackgroundFetch().catch(() => {});
     React.useEffect(() => {
         const newSessionId = getSessionIdFromPath(pathname);
         if (currentSessionId && !newSessionId) {
+    // 进入会话时清除通知状态
+    if (newSessionId) {
+      onEnterSession(newSessionId);
+    }
             sync.onSessionHidden();
         }
         currentSessionId = newSessionId;
