@@ -280,6 +280,8 @@ export default function RootLayout() {
                 setInitState({ credentials });
             } catch (error) {
                 console.error('Error initializing:', error);
+                // Always unblock the splash screen so the user is never stuck.
+                setInitState({ credentials: null });
             }
         })();
     }, []);
